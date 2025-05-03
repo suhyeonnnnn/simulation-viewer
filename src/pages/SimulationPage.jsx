@@ -142,7 +142,7 @@ export default function LLMSimulator() {
   const [currentDay, setCurrentDay] = useState('Mon');
   const [selectedPerson, setSelectedPerson] = useState(null);
   
-  // People data with English details
+  // People data with English details and individual schedules
   const people = [
     { 
       id: 1, 
@@ -154,7 +154,14 @@ export default function LLMSimulator() {
         role: "Building Manager",
         age: 32,
         description: "Manages building operations and coordinates with various departments."
-      }
+      },
+      schedule: [
+        { time: "8:00-9:00", location: "Office", color: "bg-gray-600" },
+        { time: "9:00-12:00", location: "Cafe", color: "bg-amber-400" },
+        { time: "12:00-13:00", location: "Cafe", color: "bg-amber-400" },
+        { time: "13:00-17:00", location: "Conference Room", color: "bg-green-500" },
+        { time: "17:00-18:00", location: "Office", color: "bg-gray-600" },
+      ]
     },
     { 
       id: 2, 
@@ -163,10 +170,17 @@ export default function LLMSimulator() {
       persona: "staff",
       details: {
         englishName: "Sue",
-        role: "Receptionist",
+        role: "Cute Idol",
         age: 24,
         description: "Front desk operations and visitor assistance."
-      }
+      },
+      schedule: [
+        // { time: "8:00-12:00", location: "Reception", color: "bg-amber-400" },
+        { time: "12:00-13:00", location: "Study Room", color: "bg-amber-400" },
+        // { time: "13:00-17:00", location: "Reception", color: "bg-amber-400" },
+        { time: "17:00-18:00", location: "Gym", color: "bg-purple-500" },
+        { time: "18:00-19:00", location: "Study Room", color: "bg-red-500" },
+      ]
     },
     { 
       id: 3, 
@@ -178,7 +192,14 @@ export default function LLMSimulator() {
         role: "Guest",
         age: 28,
         description: "Visiting the building for meetings and events."
-      }
+      },
+      schedule: [
+        { time: "8:00-10:00", location: "No visit", color: "" },
+        { time: "10:00-12:00", location: "Conference Room", color: "bg-green-500" },
+        { time: "12:00-13:00", location: "Cafe", color: "bg-amber-400" },
+        { time: "13:00-15:00", location: "Lounge", color: "bg-purple-500" },
+        { time: "15:00-17:00", location: "Conference Room", color: "bg-green-500" },
+      ]
     },
     { 
       id: 4, 
@@ -190,7 +211,14 @@ export default function LLMSimulator() {
         role: "Data Scientist",
         age: 35,
         description: "Conducts research in machine learning and AI."
-      }
+      },
+      schedule: [
+        { time: "8:00-10:00", location: "Library", color: "bg-blue-500" },
+        { time: "10:00-12:00", location: "Lab", color: "bg-indigo-500" },
+        { time: "12:00-13:00", location: "Cafe", color: "bg-amber-400" },
+        { time: "13:00-17:00", location: "Library", color: "bg-blue-500" },
+        { time: "17:00-19:00", location: "Lab", color: "bg-indigo-500" },
+      ]
     },
     { 
       id: 5, 
@@ -202,7 +230,14 @@ export default function LLMSimulator() {
         role: "Research Fellow",
         age: 29,
         description: "Specializes in computational biology research."
-      }
+      },
+      schedule: [
+        { time: "8:00-10:00", location: "Lab", color: "bg-indigo-500" },
+        { time: "10:00-12:00", location: "Conference Room", color: "bg-green-500" },
+        { time: "12:00-13:00", location: "Cafe", color: "bg-amber-400" },
+        { time: "13:00-16:00", location: "Lab", color: "bg-indigo-500" },
+        { time: "16:00-19:00", location: "Library", color: "bg-blue-500" },
+      ]
     },
     { 
       id: 6, 
@@ -211,10 +246,17 @@ export default function LLMSimulator() {
       persona: "student",
       details: {
         englishName: "Juneha",
-        role: "Graduate Student",
-        age: 24,
-        description: "Pursuing PhD in Computer Science."
-      }
+        role: "PhD Student",
+        age: 21,
+        description: "He is a genius baby. He married Sue❤️"
+      },
+      schedule: [
+        // { time: "8:00-12:00", location: "Reception", color: "bg-amber-400" },
+        { time: "12:00-13:00", location: "Study Room", color: "bg-amber-400" },
+        // { time: "13:00-17:00", location: "Reception", color: "bg-amber-400" },
+        { time: "17:00-18:00", location: "Gym", color: "bg-purple-500" },
+        { time: "18:00-19:00", location: "Study Room", color: "bg-red-500" },
+      ]
     },
     { 
       id: 7, 
@@ -226,7 +268,14 @@ export default function LLMSimulator() {
         role: "Software Engineer",
         age: 31,
         description: "Develops software solutions for enterprise clients."
-      }
+      },
+      schedule: [
+        { time: "8:00-10:00", location: "Cafe", color: "bg-amber-400" },
+        { time: "10:00-12:00", location: "Conference Room", color: "bg-green-500" },
+        { time: "12:00-13:00", location: "Cafe", color: "bg-amber-400" },
+        { time: "13:00-18:00", location: "Office", color: "bg-gray-600" },
+        { time: "18:00-19:00", location: "Gym", color: "bg-red-500" },
+      ]
     },
     { 
       id: 8, 
@@ -238,7 +287,14 @@ export default function LLMSimulator() {
         role: "Product Manager",
         age: 34,
         description: "Manages product development and strategy."
-      }
+      },
+      schedule: [
+        { time: "8:00-9:00", location: "Cafe", color: "bg-amber-400" },
+        { time: "9:00-12:00", location: "Conference Room", color: "bg-green-500" },
+        { time: "12:00-13:00", location: "Cafe", color: "bg-amber-400" },
+        { time: "13:00-17:00", location: "Conference Room", color: "bg-green-500" },
+        { time: "17:00-19:00", location: "Office", color: "bg-gray-600" },
+      ]
     },
   ];
 
@@ -305,15 +361,15 @@ export default function LLMSimulator() {
     "8:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00"
   ];
 
-  // Get current location for a persona based on time
-  const getCurrentLocation = (persona, time) => {
+  // Get current location for a person based on their individual schedule
+  const getCurrentLocation = (personId, time) => {
     const hourFraction = time / 4;
     const hour = Math.floor(hourFraction + 8);
     
-    const personaData = timelineData.find(data => data.key === persona);
-    if (!personaData) return "No visit";
+    const person = people.find(p => p.id === personId);
+    if (!person || !person.schedule) return "No visit";
 
-    for (const slot of personaData.schedule) {
+    for (const slot of person.schedule) {
       const [start, end] = slot.time.split('-');
       const startHour = parseInt(start.split(':')[0]);
       const endHour = parseInt(end.split(':')[0]);
@@ -334,11 +390,15 @@ export default function LLMSimulator() {
       { location: "Library", color: "bg-blue-500", textColor: "text-white", bgLight: "bg-blue-100" },
       { location: "Conference Room", color: "bg-green-500", textColor: "text-white", bgLight: "bg-green-100" },
       { location: "Lounge", color: "bg-purple-500", textColor: "text-white", bgLight: "bg-purple-100" },
+      { location: "Lab", color: "bg-indigo-500", textColor: "text-white", bgLight: "bg-indigo-100" },
+      { location: "Office", color: "bg-gray-600", textColor: "text-white", bgLight: "bg-gray-100" },
+      { location: "Reception", color: "bg-amber-400", textColor: "text-white", bgLight: "bg-amber-100" },
+      { location: "Study Room", color: "bg-teal-500", textColor: "text-white", bgLight: "bg-teal-100" },
     ];
 
     return locations.map(loc => ({
       ...loc,
-      people: people.filter(person => getCurrentLocation(person.persona, currentTime) === loc.location)
+      people: people.filter(person => getCurrentLocation(person.id, currentTime) === loc.location)
     }));
   };
 
@@ -444,6 +504,17 @@ export default function LLMSimulator() {
       setCurrentDay(days[(days.indexOf(currentDay) + 1) % days.length]);
     }
   }, [currentTime]);
+
+  // Get current facility status
+  const getFacilityStatus = () => {
+    const hour = Math.floor(currentTime / 4) + 8;
+    return getFacilities().map(facility => ({
+      ...facility,
+      isOpen: hour >= 8 && hour < 22, // All facilities open 8AM-10PM
+      openingTime: "8:00 AM",
+      closingTime: "10:00 PM"
+    }));
+  };
 
   return (
     <div className="min-h-screen w-full flex flex-col">
@@ -723,15 +794,81 @@ export default function LLMSimulator() {
             </div>
           </div>
 
-          {/* Right Section - Persona Info Card */}
-          <div className="w-[400px]">
+          {/* Right Section - Info Cards */}
+          <div className="w-[400px] space-y-6">
+            {/* Simulation Details Card */}
+            <Card className="shadow-md">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 py-4">
+                <CardTitle className="text-lg font-bold text-[#002DAA]">
+                  Simulation Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-5">
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 mb-1">Week Day</h4>
+                    <p className="text-gray-600">{currentDay} - {days[days.indexOf(currentDay) + 6 < days.length ? days[days.indexOf(currentDay) + 6] : days[days.indexOf(currentDay) + 6 - 7]]}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 mb-1">Current Capacity</h4>
+                    <p className="text-gray-600">{people.length} participants</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 mb-1">Building Hours</h4>
+                    <p className="text-gray-600">8:00 AM - 10:00 PM</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 mb-1">Simulation Status</h4>
+                    <p className={`text-${isPlaying ? 'green' : 'red'}-600 font-medium`}>
+                      {isPlaying ? 'Running' : 'Paused'}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Facilities Status Card */}
+            <Card className="shadow-md">
+              <CardHeader className="bg-gradient-to-r from-green-50 to-green-100 py-4">
+                <CardTitle className="text-lg font-bold text-[#006400]">
+                  Facilities Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  {getFacilityStatus().map((facility) => {
+                    const hour = Math.floor(currentTime / 4) + 8;
+                    const isOpen = hour >= 8 && hour < 22;
+                    return (
+                      <div key={facility.id} className="flex justify-between items-center">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-2 h-2 rounded-full ${isOpen ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                          <span className="text-gray-700">{facility.name}</span>
+                        </div>
+                        <span className={`text-sm font-medium ${isOpen ? 'text-green-600' : 'text-red-600'}`}>
+                          {isOpen ? 'Open' : 'Closed'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Persona Info Card */}
             {selectedPerson ? (
-              <Card className="sticky top-4">
-                <CardHeader>
+              <Card className="shadow-md">
+                <CardHeader className={`${
+                  selectedPerson.persona === 'student' ? 'bg-gradient-to-r from-blue-50 to-blue-100' :
+                  selectedPerson.persona === 'professional' ? 'bg-gradient-to-r from-purple-50 to-purple-100' :
+                  selectedPerson.persona === 'researcher' ? 'bg-gradient-to-r from-green-50 to-green-100' :
+                  selectedPerson.persona === 'visitor' ? 'bg-gradient-to-r from-orange-50 to-orange-100' :
+                  'bg-gradient-to-r from-gray-50 to-gray-100'
+                } py-4`}>
                   <div className="flex justify-between items-start">
                     <div className="flex items-center space-x-4">
                       <Avatar className="h-16 w-16">
-                        <AvatarFallback className="bg-gray-200 text-[#daa520] text-3xl">
+                        <AvatarFallback className="bg-white text-[#daa520] text-3xl">
                           {selectedPerson.emoji}
                         </AvatarFallback>
                       </Avatar>
@@ -744,14 +881,14 @@ export default function LLMSimulator() {
                     </div>
                     <button
                       onClick={() => setSelectedPerson(null)}
-                      className="text-gray-400 hover:text-gray-600"
+                      className="text-gray-400 hover:text-gray-600 text-xl"
                     >
                       ×
                     </button>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
+                <CardContent className="p-6">
+                  <div className="space-y-6">
                     <div>
                       <h4 className="text-sm font-semibold text-gray-700 mb-1">Description</h4>
                       <p className="text-gray-600">{selectedPerson.details.description}</p>
@@ -759,22 +896,21 @@ export default function LLMSimulator() {
                     <div>
                       <h4 className="text-sm font-semibold text-gray-700 mb-1">Current Activity</h4>
                       <p className="text-gray-600">
-                        Currently at: {getCurrentLocation(selectedPerson.persona, currentTime)}
+                        Currently at: {getCurrentLocation(selectedPerson.id, currentTime)}
                       </p>
                     </div>
                     <div>
                       <h4 className="text-sm font-semibold text-gray-700 mb-2">Today's Schedule</h4>
                       <div className="space-y-2">
-                        {timelineData
-                          .find(t => t.key === selectedPerson.persona)
-                          ?.schedule.map((slot, idx) => (
-                            <div 
-                              key={idx} 
-                              className={`p-2 rounded text-sm ${slot.color} text-white`}
-                            >
-                              <span className="font-medium">{slot.time}</span>: {slot.location}
-                              </div>
-                          ))
+                        {selectedPerson.schedule?.map((slot, idx) => (
+                          <div 
+                            key={idx} 
+                            className={`p-3 rounded text-sm ${slot.color} text-white flex justify-between items-center`}
+                          >
+                            <span className="font-medium">{slot.time}</span>
+                            <span>{slot.location}</span>
+                          </div>
+                        ))
                         }
                       </div>
                     </div>
@@ -782,9 +918,12 @@ export default function LLMSimulator() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="sticky top-4">
-                <CardContent className="py-16 text-center text-gray-500">
-                  Click on a person to see their details
+              <Card className="shadow-md">
+                <CardContent className="py-20 text-center text-gray-500">
+                  <div className="space-y-2">
+                    <div className="text-gray-400 text-4xl">👆</div>
+                    <p>Click on a person to see their details</p>
+                  </div>
                 </CardContent>
               </Card>
             )}
