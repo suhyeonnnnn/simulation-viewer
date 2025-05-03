@@ -1,16 +1,16 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const stages = [
-  { name: "Home", path: "/" },
-  { name: "Personas", path: "/personas" },
-  { name: "Facilities", path: "/facilities" },
-  { name: "Simulation", path: "/simulation" },
-  { name: "Results", path: "/results" },
-];
-
 export default function StageTabs({ activeStage }) {
   const navigate = useNavigate();
+  
+  const stages = [
+    { name: "Home", path: "/", icon: "🏠" },
+    { name: "Facilities", path: "/facilities", icon: "🏢" },
+    { name: "Personas", path: "/personas", icon: "👥" },
+    { name: "Simulation", path: "/simulation", icon: "⚡" },
+    { name: "Results", path: "/results", icon: "📊" },
+  ];
 
   return (
     <div className="flex space-x-4 mb-6">

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import StageTabs from "../components/StageTabs";
+import { useNavigate } from "react-router-dom";
 
 // Custom UI Components - Standalone versions without shadcn/ui
 const Avatar = ({ children, className = '' }) => (
@@ -135,6 +137,7 @@ const SelectItem = ({ children, value, onSelect }) => (
 );
 
 export default function LLMSimulator() {
+  const navigate = useNavigate();
   // State for simulation
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -518,20 +521,7 @@ export default function LLMSimulator() {
 
   return (
     <div className="min-h-screen w-full flex flex-col">
-      {/* Header */}
-      <header className="bg-[#002DAA] h-24 w-full flex items-center">
-        <div className="flex items-center ml-8">
-          <span className="text-white text-2xl font-bold mr-3">🤖</span>
-          <h1 className="text-white text-2xl font-bold font-inter-bold">
-            LLM Facilities Simulator
-          </h1>
-        </div>
-      </header>
 
-      {/* Project Info Banner */}
-      <div className="bg-[#002DAA] bg-opacity-10 py-3 px-8 text-[#002DAA] text-sm">
-        This project was created as part of the KAIST-CMU Visiting Program
-      </div>
 
       {/* Main Content - Now wider */}
       <main className="flex-1 p-8 max-w-[1600px] mx-auto w-full">
