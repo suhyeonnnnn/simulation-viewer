@@ -248,7 +248,7 @@ export default function LLMSimulator() {
         englishName: "Juneha",
         role: "PhD Student",
         age: 21,
-        description: "He is a genius baby. He married Sue❤️"
+        description: "He is PhD Student in informationi systems"
       },
       schedule: [
         // { time: "8:00-12:00", location: "Reception", color: "bg-amber-400" },
