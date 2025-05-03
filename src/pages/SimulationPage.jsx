@@ -57,7 +57,7 @@ const Separator = ({ className = '' }) => (
   <div className={`shrink-0 bg-border h-[1px] w-full ${className}`}></div>
 );
 
-// Fixed Select component
+// Select components
 const Select = ({ children, value, onValueChange, defaultValue }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentValue, setCurrentValue] = useState(value || defaultValue);
@@ -447,14 +447,7 @@ export default function LLMSimulator() {
 
   return (
     <div className="min-h-screen w-full flex flex-col">
-      {/* Footer */}
-      <footer className="bg-gray-100 h-12 flex items-center justify-between px-8 text-sm text-[#666666]">
-        <div>LLM Facilities Simulation v1.0</div>
-        <div>Made by Suhyeon Lee</div>
-      </footer>
-    </div>
-  );
-} Header */}
+      {/* Header */}
       <header className="bg-[#002DAA] h-24 w-full flex items-center">
         <div className="flex items-center ml-8">
           <span className="text-white text-2xl font-bold mr-3">🤖</span>
@@ -780,7 +773,7 @@ export default function LLMSimulator() {
                               className={`p-2 rounded text-sm ${slot.color} text-white`}
                             >
                               <span className="font-medium">{slot.time}</span>: {slot.location}
-                            </div>
+                              </div>
                           ))
                         }
                       </div>
@@ -804,3 +797,6 @@ export default function LLMSimulator() {
         <div>LLM Facilities Simulation v1.0</div>
         <div>Made by Suhyeon Lee</div>
       </footer>
+    </div>
+  );
+}
