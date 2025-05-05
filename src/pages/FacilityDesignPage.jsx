@@ -102,7 +102,7 @@ export default function FacilityDesignPage() {
     
     // 시뮬레이션 페이지로 이동
     alert(`Facilities saved! Proceeding to simulation with ${validFacilities.length} facilities.`);
-    navigate('/persona');
+    navigate('/personas');
   };
 
   const toggleExpand = (index) => {
