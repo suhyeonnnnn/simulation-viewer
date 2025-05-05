@@ -154,8 +154,8 @@ export default function LLMSimulator() {
       persona: "staff",
       details: {
         englishName: "Jane",
-        role: "Building Manager",
-        age: 32,
+        role: "Building Owner",
+        age: 22,
         description: "Manages building operations and coordinates with various departments."
       },
       schedule: [
@@ -231,7 +231,7 @@ export default function LLMSimulator() {
       details: {
         englishName: "Mel",
         role: "Research Fellow",
-        age: 29,
+        age: 23,
         description: "Specializes in computational biology research."
       },
       schedule: [
@@ -269,7 +269,7 @@ export default function LLMSimulator() {
       details: {
         englishName: "Yun",
         role: "Software Engineer",
-        age: 31,
+        age: 21,
         description: "Develops software solutions for enterprise clients."
       },
       schedule: [
@@ -288,7 +288,7 @@ export default function LLMSimulator() {
       details: {
         englishName: "Hyu",
         role: "Product Manager",
-        age: 34,
+        age: 24,
         description: "Manages product development and strategy."
       },
       schedule: [
@@ -299,6 +299,61 @@ export default function LLMSimulator() {
         { time: "17:00-19:00", location: "Office", color: "bg-gray-600" },
       ]
     },
+    { 
+      id: 9, 
+      name: "Edward", 
+      emoji: "👦", 
+      persona: "High school student",
+      details: {
+        englishName: "Edward",
+        role: "Student",
+        age: 18,
+        description: "Attends high school and prepares for university entrance exams."
+      },
+      schedule: [
+        { time: "8:00-9:00", location: "Study Room", color: "bg-teal-500" },
+        { time: "9:00-15:00", location: "Conference Room", color: "bg-green-500" },
+        { time: "15:00-17:00", location: "Library", color: "bg-blue-500" },
+        { time: "17:00-19:00", location: "Lounge", color: "bg-purple-500" },
+      ]
+    },
+    { 
+      id: 10, 
+      name: "Regina", 
+      emoji: "👩", 
+      persona: "Homemaker",
+      details: {
+        englishName: "Regina",
+        role: "Homemaker",
+        age: 38,
+        description: "Manages household responsibilities and takes care of her family."
+      },
+      schedule: [
+        { time: "8:00-9:00", location: "Cafe", color: "bg-amber-400" },
+        { time: "9:00-12:00", location: "Reception", color: "bg-amber-400" },
+        { time: "12:00-13:00", location: "Cafe", color: "bg-amber-400" },
+        { time: "13:00-15:00", location: "Lounge", color: "bg-purple-500" },
+        { time: "15:00-18:00", location: "Office", color: "bg-gray-600" },
+      ]
+    },
+    { 
+      id: 11, 
+      name: "Michel", 
+      emoji: "👨‍🍳", 
+      persona: "Chef",
+      details: {
+        englishName: "Michel",
+        role: "Chef",
+        age: 35,
+        description: "Prepares meals in a restaurant and manages kitchen staff."
+      },
+      schedule: [
+        { time: "8:00-10:00", location: "Reception", color: "bg-amber-400" },
+        { time: "10:00-14:00", location: "Lab", color: "bg-indigo-500" },
+        { time: "14:00-16:00", location: "Lounge", color: "bg-purple-500" },
+        { time: "16:00-21:00", location: "Lab", color: "bg-indigo-500" },
+      ]
+    }
   ];
 
   // Timeline data
