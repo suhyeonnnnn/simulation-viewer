@@ -1,0 +1,94 @@
+{
+    "personas": [
+      {
+        "id": 1,
+        "name": "Jane",
+        "emoji": "👱",
+        "persona_type": "staff",
+        "details": {
+          "english_name": "Jane",
+          "role": "Building Manager",
+          "age": 32,
+          "description": "Manages building operations and coordinates with various departments.",
+          "personality": "Organized, sociable, leadership-oriented"
+        },
+        "daily_schedule": [
+          {
+            "time_slot": "8:00-9:00",
+            "location": "Office",
+            "location_color": "bg-gray-600",
+            "llm_reasoning": "As a building manager, Jane starts her day early in the office to review overnight reports and plan daily operations."
+          },
+          {
+            "time_slot": "9:00-12:00",
+            "location": "Cafe",
+            "location_color": "bg-amber-400",
+            "llm_reasoning": "Jane uses the cafe as an informal meeting space to connect with staff and visitors, building relationships while staying accessible."
+          },
+          {
+            "time_slot": "12:00-13:00",
+            "location": "Cafe",
+            "location_color": "bg-amber-400",
+            "llm_reasoning": "Lunch break in the cafe allows Jane to continue informal networking and observe facility usage patterns."
+          },
+          {
+            "time_slot": "13:00-17:00",
+            "location": "Conference Room",
+            "location_color": "bg-green-500",
+            "llm_reasoning": "Afternoon meetings in conference room for strategic planning and departmental coordination - formal business requires dedicated space."
+          },
+          {
+            "time_slot": "17:00-18:00",
+            "location": "Office",
+            "location_color": "bg-gray-600",
+            "llm_reasoning": "End-of-day wrap-up in office to complete administrative tasks and prepare for next day before building closes."
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "name": "Edgar",
+        "emoji": "👨",
+        "persona_type": "researcher",
+        "details": {
+          "english_name": "Edgar",
+          "role": "AI Research Scientist",
+          "age": 29,
+          "description": "Conducts research in machine learning and LLM behavior analysis.",
+          "personality": "Analytical, focused, innovation-driven"
+        },
+        "daily_schedule": [
+          {
+            "time_slot": "8:00-10:00",
+            "location": "Library",
+            "location_color": "bg-blue-500",
+            "llm_reasoning": "Edgar prefers quiet morning hours in library for deep reading and literature review when his concentration is highest."
+          },
+          {
+            "time_slot": "10:00-12:00",
+            "location": "Lab",
+            "location_color": "bg-indigo-500",
+            "llm_reasoning": "Mid-morning lab time for experimental work when Edgar is mentally sharp but energy levels allow for hands-on technical tasks."
+          },
+          {
+            "time_slot": "12:00-13:00",
+            "location": "Cafe",
+            "location_color": "bg-amber-400",
+            "llm_reasoning": "Social lunch break in cafe provides Edgar with necessary social interaction to balance his solitary research work."
+          },
+          {
+            "time_slot": "13:00-17:00",
+            "location": "Library",
+            "location_color": "bg-blue-500",
+            "llm_reasoning": "Afternoon return to library for writing and analysis - post-lunch period suits Edgar's preference for reflective, analytical work."
+          },
+          {
+            "time_slot": "17:00-19:00",
+            "location": "Lab",
+            "location_color": "bg-indigo-500",
+            "llm_reasoning": "Evening lab session for running long experiments that can continue overnight - Edgar optimizes his schedule around computational resources."
+          }
+        ]
+      }
+    ]
+  }

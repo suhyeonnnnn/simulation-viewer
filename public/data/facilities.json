@@ -1,0 +1,68 @@
+{
+    "facilities": [
+      {
+        "id": 1,
+        "name": "Cafe",
+        "color": "bg-amber-400",
+        "textColor": "text-white",
+        "capacity": 20,
+        "type": "social"
+      },
+      {
+        "id": 2,
+        "name": "Gym",
+        "color": "bg-red-500",
+        "textColor": "text-white",
+        "capacity": 20,
+        "type": "fitness"
+      },
+      {
+        "id": 3,
+        "name": "Library",
+        "color": "bg-blue-500",
+        "textColor": "text-white",
+        "capacity": 20,
+        "type": "study"
+      },
+      {
+        "id": 4,
+        "name": "Conference Room",
+        "color": "bg-green-500",
+        "textColor": "text-white",
+        "capacity": 20,
+        "type": "meeting"
+      },
+      {
+        "id": 5,
+        "name": "Lounge",
+        "color": "bg-purple-500",
+        "textColor": "text-white",
+        "capacity": 20,
+        "type": "social"
+      },
+      {
+        "id": 6,
+        "name": "Lab",
+        "color": "bg-indigo-500",
+        "textColor": "text-white",
+        "capacity": 20,
+        "type": "work"
+      },
+      {
+        "id": 7,
+        "name": "Office",
+        "color": "bg-gray-600",
+        "textColor": "text-white",
+        "capacity": 20,
+        "type": "work"
+      },
+      {
+        "id": 8,
+        "name": "Study Room",
+        "color": "bg-teal-500",
+        "textColor": "text-white",
+        "capacity": 20,
+        "type": "study"
+      }
+    ]
+  }

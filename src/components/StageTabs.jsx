@@ -9,6 +9,7 @@ export default function StageTabs({ activeStage }) {
     { name: "Facilities", path: "/facilities", icon: "🏢" },
     { name: "Personas", path: "/personas", icon: "👥" },
     { name: "Simulation", path: "/simulation", icon: "⚡" },
+    { name: "What If", path: "/what-if", icon: "🔮" },
     { name: "Results", path: "/results", icon: "📊" },
   ];
 
