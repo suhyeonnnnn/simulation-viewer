@@ -23,7 +23,7 @@ export const PageWithTabs = ({ children, activeStage }) => {
           <div className="flex items-center">
             <span className="text-white text-2xl font-bold mr-3">🤖</span>
             <h1 className="text-white text-2xl font-bold font-inter-bold">
-              LLM Facilities Simulator
+              PlaceSim
             </h1>
           </div>
           

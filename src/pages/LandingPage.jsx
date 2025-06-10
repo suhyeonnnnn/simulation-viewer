@@ -261,10 +261,10 @@ export default function LandingPage() {
       )}
 
       {/* Hero Section with LLM Status */}
-      <div className="bg-gradient-to-br from-blue-50 via-white to-amber-50 py-16">
+      <div className="bg-gradient-to-br from-blue-50 via-white to-amber-50 py-16 mt-20">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-[#212121] mb-4">
-            LLM Behavior Simulator
+          PlaceSim: LLM-Powered Human Behavior Simulation
           </h1>
           <p className="text-xl text-[#424242] max-w-3xl mx-auto mb-8">
             Create AI Personas. Design Spaces. Simulate Movements.
