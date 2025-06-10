@@ -200,9 +200,11 @@ const FacilityAnalytics = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-100 h-12 flex items-center justify-between px-8 text-sm text-[#666666]">
-        <div>Facility Analytics Dashboard v1.0</div>
-        <div>Made by Suhyeon Lee</div>
+      <footer className="bg-gray-800 text-white p-4 mt-8">
+        <div className="max-w-[1600px] mx-auto flex justify-between items-center text-sm">
+          <div>PlaceSim v1.0 - LLM-Driven Simulation</div>
+          <div>CIKM 2025 Demo</div>
+        </div>
       </footer>
     </div>
   );

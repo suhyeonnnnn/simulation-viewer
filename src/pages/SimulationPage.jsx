@@ -195,16 +195,6 @@ export default function PlaceSim() {
     { id: 9, name: "Dining Hall", color: "bg-orange-500", textColor: "text-white", capacity: 20, type: "social" }
   ];
 
-  // 색상 할당 함수
-  const getFacilityColor = (facilityName, index) => {
-    const colors = [
-      "bg-amber-400", "bg-blue-500", "bg-green-500", "bg-red-500",
-      "bg-purple-500", "bg-gray-600", "bg-indigo-500", "bg-teal-500", 
-      "bg-orange-500", "bg-pink-500", "bg-cyan-500", "bg-lime-500"
-    ];
-    return colors[index % colors.length];
-  };
-
   // Load data from localStorage
   const loadLocalStorageData = () => {
     try {
@@ -214,24 +204,11 @@ export default function PlaceSim() {
       
       if (storedFacilities) {
         const facilitiesData = JSON.parse(storedFacilities);
-        console.log('Raw facilities data from localStorage:', facilitiesData);
-        
-        // 직접 배열인지 확인
-        if (Array.isArray(facilitiesData)) {
-          facilities = facilitiesData.map((facility, index) => ({
-            id: facility.id || index + 1,
-            name: facility.name,
-            color: getFacilityColor(facility.name, index),
-            textColor: "text-white",
-            capacity: facility.capacity || 20,
-            type: facility.type || "general"
-          }));
-        } else if (facilitiesData.facilities && Array.isArray(facilitiesData.facilities)) {
-          // 만약 중첩된 구조라면
+        if (facilitiesData.facilities && Array.isArray(facilitiesData.facilities)) {
           facilities = facilitiesData.facilities.map((facility, index) => ({
             id: facility.id || index + 1,
             name: facility.name,
-            color: getFacilityColor(facility.name, index),
+            color: facility.color || defaultFacilities.find(f => f.name === facility.name)?.color || "bg-gray-500",
             textColor: "text-white",
             capacity: facility.capacity || 20,
             type: facility.type || "general"
@@ -241,7 +218,6 @@ export default function PlaceSim() {
       
       // Use default facilities if none found
       if (facilities.length === 0) {
-        console.log('No facilities found in localStorage, using defaults');
         facilities = defaultFacilities;
       }
 
@@ -251,13 +227,7 @@ export default function PlaceSim() {
       
       if (storedPersonas) {
         const personasData = JSON.parse(storedPersonas);
-        console.log('Raw personas data from localStorage:', personasData);
-        
-        // 직접 배열인지 확인
-        if (Array.isArray(personasData)) {
-          personas = personasData;
-        } else if (personasData.personas && Array.isArray(personasData.personas)) {
-          // 만약 중첩된 구조라면
+        if (personasData.personas && Array.isArray(personasData.personas)) {
           personas = personasData.personas;
         }
       }
@@ -272,10 +242,9 @@ export default function PlaceSim() {
         setSelectedPerson(personas[0]);
       }
 
-      console.log('Final loaded data:', {
+      console.log('Loaded from localStorage:', {
         facilities: facilities.length,
-        personas: personas.length,
-        facilityNames: facilities.map(f => f.name)
+        personas: personas.length
       });
 
     } catch (error) {
@@ -301,14 +270,13 @@ export default function PlaceSim() {
       const personasData = await personasResponse.json();
       
       setSimulationData({
-        facilities: facilitiesData.facilities || facilitiesData,
-        personas: personasData.personas || personasData
+        facilities: facilitiesData.facilities,
+        personas: personasData.personas
       });
       
       // Auto-select first person
-      const personas = personasData.personas || personasData;
-      if (personas.length > 0) {
-        setSelectedPerson(personas[0]);
+      if (personasData.personas.length > 0) {
+        setSelectedPerson(personasData.personas[0]);
       }
       
     } catch (error) {
@@ -409,19 +377,40 @@ export default function PlaceSim() {
     return simulationData.facilities.map(facility => {
       const currentUsers = people.filter(person => getCurrentLocation(person.id, currentTime) === facility.name);
       
-      // Calculate persona distribution
-      const personas = {
-        student: currentUsers.filter(p => p.persona_type === 'student').length,
-        professional: currentUsers.filter(p => p.persona_type === 'professional').length,
-        researcher: currentUsers.filter(p => p.persona_type === 'researcher').length,
-        visitor: currentUsers.filter(p => p.persona_type === 'visitor').length,
-        staff: currentUsers.filter(p => p.persona_type === 'staff').length,
+      // Calculate age and gender distribution
+      const demographics = {
+        // Age groups
+        teens: currentUsers.filter(p => {
+          const age = p.details?.age || 0;
+          return age >= 10 && age < 20;
+        }).length,
+        twenties: currentUsers.filter(p => {
+          const age = p.details?.age || 0;
+          return age >= 20 && age < 30;
+        }).length,
+        thirties: currentUsers.filter(p => {
+          const age = p.details?.age || 0;
+          return age >= 30 && age < 40;
+        }).length,
+        forties_plus: currentUsers.filter(p => {
+          const age = p.details?.age || 0;
+          return age >= 40;
+        }).length,
+        // Gender
+        male: currentUsers.filter(p => {
+          const gender = p.details?.gender || p.gender || '';
+          return gender.toLowerCase() === 'male';
+        }).length,
+        female: currentUsers.filter(p => {
+          const gender = p.details?.gender || p.gender || '';
+          return gender.toLowerCase() === 'female';
+        }).length,
       };
       
       return {
         ...facility,
         users: currentUsers.length,
-        personas
+        demographics
       };
     });
   };
@@ -468,64 +457,7 @@ export default function PlaceSim() {
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-gray-50">
-      {/* Header */}
-      <header className="bg-blue-700 text-white p-4">
-        <div className="max-w-[1600px] mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <div className="text-2xl">🤖</div>
-            <div>
-              <h1 className="text-xl font-bold">PlaceSim</h1>
-              <p className="text-sm text-blue-200">LLM-Driven Human Behavior Simulation</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            {/* Data Source Selector */}
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-blue-200">Data Source:</span>
-              <Select value={dataSource} onValueChange={setDataSource}>
-                <SelectTrigger className="w-[140px] h-8 text-sm bg-blue-600 border-blue-500 text-white">
-                  <SelectValue value={dataSource} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="localStorage">localStorage</SelectItem>
-                  <SelectItem value="sample">Sample Data</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="text-sm text-blue-200">
-              CIKM 2025 Demo
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Data Status Banner */}
-      <div className={`px-4 py-2 ${people.length > 0 ? 'bg-green-100 border-green-200' : 'bg-yellow-100 border-yellow-200'} border-b`}>
-        <div className="max-w-[1600px] mx-auto flex justify-between items-center text-sm">
-          <div className={`${people.length > 0 ? 'text-green-800' : 'text-yellow-800'}`}>
-            {people.length > 0 
-              ? `✅ Loaded ${people.length} personas and ${simulationData.facilities.length} facilities from ${dataSource === 'localStorage' ? 'localStorage' : 'sample data'}`
-              : `⚠️ No personas found in ${dataSource}. Please generate personas first or switch data source.`}
-          </div>
-          {people.length === 0 && dataSource === 'localStorage' && (
-            <button 
-              onClick={() => setDataSource('sample')}
-              className="text-yellow-800 hover:text-yellow-700 underline"
-            >
-              Load Sample Data
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Debug Info */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="px-4 py-2 bg-gray-100 border-b text-xs text-gray-600">
-          <div className="max-w-[1600px] mx-auto">
-            Debug: Facilities loaded - {simulationData.facilities.map(f => f.name).join(', ')}
-          </div>
-        </div>
-      )}
+      
 
       {/* Main Content */}
       <main className="flex-1 p-6 max-w-[1600px] mx-auto w-full">
@@ -674,34 +606,43 @@ export default function PlaceSim() {
                           </div>
                           <Separator className="mb-3" />
                           <div className="space-y-2">
+                            <div className="text-xs font-semibold text-gray-500 mb-2">Age Groups</div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-700">🧑 Student</span>
+                              <span className="text-gray-700">👦 10s </span>
                               <span className="text-gray-700 font-medium">
-                                {facility.personas.student}
+                                {facility.demographics.teens}
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-700">👔 Professional</span>
+                              <span className="text-gray-700">👨 20s</span>
                               <span className="text-gray-700 font-medium">
-                                {facility.personas.professional}
+                                {facility.demographics.twenties}
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-700">🔬 Researcher</span>
+                              <span className="text-gray-700">👩‍💼 30s</span>
                               <span className="text-gray-700 font-medium">
-                                {facility.personas.researcher}
+                                {facility.demographics.thirties}
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-700">🧳 Visitor</span>
+                              <span className="text-gray-700">👨‍🦳 40+</span>
                               <span className="text-gray-700 font-medium">
-                                {facility.personas.visitor}
+                                {facility.demographics.forties_plus}
+                              </span>
+                            </div>
+                            
+                            <div className="text-xs font-semibold text-gray-500 mb-2 mt-3">Gender</div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-700">♂️ Male</span>
+                              <span className="text-gray-700 font-medium">
+                                {facility.demographics.male}
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-700">🛠 Staff</span>
+                              <span className="text-gray-700">♀️ Female</span>
                               <span className="text-gray-700 font-medium">
-                                {facility.personas.staff}
+                                {facility.demographics.female}
                               </span>
                             </div>
                           </div>
@@ -730,7 +671,7 @@ export default function PlaceSim() {
                           }`}
                         >
                           <span className="text-lg">{person.emoji}</span>
-                          <span className="font-medium">{person.details?.english_name || person.name}</span>
+                          <span className="font-medium">{person.details.english_name}</span>
                         </button>
                       ))}
                     </div>
@@ -746,9 +687,9 @@ export default function PlaceSim() {
                               </AvatarFallback>
                             </Avatar>
                             <div>
-                              <h3 className="text-xl font-bold">{selectedPerson.details?.english_name || selectedPerson.name}</h3>
-                              <p className="text-gray-600">{selectedPerson.details?.role || selectedPerson.persona_type} • Age {selectedPerson.details?.age || 'N/A'}</p>
-                              <p className="text-sm text-gray-500">{selectedPerson.details?.personality || selectedPerson.personality}</p>
+                              <h3 className="text-xl font-bold">{selectedPerson.details.english_name}</h3>
+                              <p className="text-gray-600">{selectedPerson.details.role} • Age {selectedPerson.details.age}</p>
+                              <p className="text-sm text-gray-500">{selectedPerson.details.personality}</p>
                             </div>
                           </div>
 
@@ -763,41 +704,16 @@ export default function PlaceSim() {
                           </div>
 
                           <div className="bg-green-50 p-4 rounded-lg">
-                            <h4 className="font-semibold text-green-800 mb-2">🤖 Current AI Decision</h4>
+                            <h4 className="font-semibold text-green-800 mb-2">🤖 Reasoning</h4>
                             <p className="text-sm text-green-700">
                               {getCurrentReasoning(selectedPerson.id, currentTime)}
                             </p>
-                          </div>
-
-                          {/* Additional persona info */}
-                          <div className="bg-gray-50 p-4 rounded-lg">
-                            <h4 className="font-semibold text-gray-800 mb-2">Persona Details</h4>
-                            <div className="space-y-2 text-sm">
-                              {selectedPerson.preferred_facilities && (
-                                <div>
-                                  <span className="font-medium">Preferred Facilities:</span>
-                                  <span className="ml-2 text-gray-600">{selectedPerson.preferred_facilities.join(', ')}</span>
-                                </div>
-                              )}
-                              {selectedPerson.active_hours && (
-                                <div>
-                                  <span className="font-medium">Active Hours:</span>
-                                  <span className="ml-2 text-gray-600">{selectedPerson.active_hours}</span>
-                                </div>
-                              )}
-                              {selectedPerson.family_structure && (
-                                <div>
-                                  <span className="font-medium">Family Structure:</span>
-                                  <span className="ml-2 text-gray-600">{selectedPerson.family_structure}</span>
-                                </div>
-                              )}
-                            </div>
                           </div>
                         </div>
 
                         {/* Schedule Timeline */}
                         <div className="space-y-4">
-                          <h4 className="font-semibold text-gray-800">Daily Schedule & AI Decision Making</h4>
+                          <h4 className="font-semibold text-gray-800">Daily Schedule</h4>
                           <div className="space-y-3 max-h-[500px] overflow-y-auto">
                             {selectedPerson.daily_schedule?.map((slot, idx) => {
                               const isCurrentSlot = getCurrentLocation(selectedPerson.id, currentTime) === slot.location && slot.location !== "No visit";
@@ -812,12 +728,12 @@ export default function PlaceSim() {
                                 >
                                   <div className="flex justify-between items-center mb-2">
                                     <span className="font-medium text-gray-800">{slot.time_slot}</span>
-                                    <div className={`px-3 py-1 rounded text-sm text-white ${slot.location_color || getFacilityColor(slot.location, idx)}`}>
+                                    <div className={`px-3 py-1 rounded text-sm text-white ${slot.location_color}`}>
                                       {slot.location}
                                     </div>
                                   </div>
                                   <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
-                                    <strong>🤖 AI Decision:</strong> {slot.llm_reasoning || 'No reasoning available'}
+                                    <strong>Why?:</strong> {slot.llm_reasoning}
                                   </div>
                                 </div>
                               );
@@ -904,7 +820,7 @@ export default function PlaceSim() {
                             const locations = getLocationPeople().filter(l => l.location !== "No visit");
                             const sorted = locations.sort((a, b) => b.people.length - a.people.length);
                             const top = sorted[0];
-                            return top && top.people.length > 0 ? (
+                            return top ? (
                               <div className="flex items-center justify-between bg-amber-50 p-2 rounded">
                                 <span className="text-sm font-medium">{top.location}</span>
                                 <span className="text-sm text-amber-700">{top.people.length} users</span>
@@ -921,7 +837,7 @@ export default function PlaceSim() {
                             {getLocationPeople()
                               .filter(l => l.location !== "No visit")
                               .map((location, idx) => {
-                                const maxCapacity = simulationData.facilities.find(f => f.name === location.location)?.capacity || 20;
+                                const maxCapacity = 20;
                                 const occupancyRate = (location.people.length / maxCapacity) * 100;
                                 return (
                                   <div key={idx} className="flex items-center justify-between">
@@ -1007,13 +923,7 @@ export default function PlaceSim() {
                     </div>
                     
                     <Button
-                      onClick={() => {
-                        if (dataSource === 'localStorage') {
-                          loadLocalStorageData();
-                        } else {
-                          loadSampleData();
-                        }
-                      }}
+                      onClick={() => window.location.reload()}
                       className="w-full bg-purple-600 text-white py-2 hover:bg-purple-700 text-sm"
                     >
                       🔄 Refresh Data
@@ -1027,52 +937,6 @@ export default function PlaceSim() {
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Quick Actions */}
-              <Card className="shadow-lg">
-                <CardHeader className="bg-gradient-to-r from-orange-50 to-orange-100 py-4">
-                  <CardTitle className="text-lg font-bold text-orange-800">
-                    ⚡ Quick Actions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <div className="space-y-3">
-                    <Button
-                      onClick={() => {
-                        setCurrentTime(0);
-                        setCurrentDay('Mon');
-                        setIsPlaying(false);
-                      }}
-                      className="w-full bg-orange-600 text-white py-2 hover:bg-orange-700 text-sm"
-                    >
-                      ↺ Reset Simulation
-                    </Button>
-                    
-                    <Button
-                      onClick={() => {
-                        // Export current state as JSON
-                        const exportData = {
-                          currentTime,
-                          currentDay,
-                          facilities: simulationData.facilities,
-                          personas: people,
-                          timestamp: new Date().toISOString()
-                        };
-                        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `simulation-export-${new Date().toISOString().split('T')[0]}.json`;
-                        a.click();
-                        URL.revokeObjectURL(url);
-                      }}
-                      className="w-full bg-blue-600 text-white py-2 hover:bg-blue-700 text-sm"
-                    >
-                      💾 Export Data
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </div>
         )}
@@ -1081,7 +945,7 @@ export default function PlaceSim() {
       {/* Footer */}
       <footer className="bg-gray-800 text-white p-4 mt-8">
         <div className="max-w-[1600px] mx-auto flex justify-between items-center text-sm">
-          <div>PlaceSim v1.0 - LLM-Driven Human Behavior Simulation</div>
+          <div>PlaceSim v1.0 - LLM-Driven Simulation</div>
           <div>CIKM 2025 Demo</div>
         </div>
       </footer>

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // 시설 유형 및 색상 매핑
 const facilityTypes = [
@@ -14,10 +15,7 @@ const facilityTypes = [
 
 export default function FacilityDesignPage() {
   // 실제 구현에서는 useNavigate를 사용하지만, 여기서는 데모 목적으로 mock 함수 사용
-  const navigate = (path) => {
-    console.log(`Navigating to: ${path}`);
-    alert(`Navigation to ${path} would happen in a real app`);
-  };
+  const navigate = useNavigate();
   
   const [facilities, setFacilities] = useState([{
     id: 1,
@@ -425,23 +423,7 @@ export default function FacilityDesignPage() {
                         min="1"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Text Color (for facility name and info)
-                      </label>
-                      <select
-                        value={facility.textColor}
-                        onChange={(e) => handleChange(index, "textColor", e.target.value)}
-                        className="border border-gray-300 rounded p-2 w-full"
-                      >
-                        <option value="text-white">White (for dark backgrounds)</option>
-                        <option value="text-black">Black (for light backgrounds)</option>
-                        <option value="text-gray-800">Dark Gray</option>
-                      </select>
-                      <p className="text-xs text-gray-500 mt-1">
-                        The color of text displayed on the facility card. Choose white for dark backgrounds, black for light backgrounds.
-                      </p>
-                    </div>
+                    
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Usage Restrictions
@@ -604,9 +586,11 @@ export default function FacilityDesignPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-100 h-12 flex items-center justify-between px-8 text-sm text-[#666666]">
-        <div>Facility Design Dashboard v1.0</div>
-        <div>Developed by Suhyeon Lee</div>
+      <footer className="bg-gray-800 text-white p-4 mt-8">
+        <div className="max-w-[1600px] mx-auto flex justify-between items-center text-sm">
+          <div>PlaceSim v1.0 - LLM-Driven Simulation</div>
+          <div>CIKM 2025 Demo</div>
+        </div>
       </footer>
     </div>
   );

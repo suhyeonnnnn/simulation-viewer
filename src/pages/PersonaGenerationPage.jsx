@@ -211,19 +211,6 @@ export default function PersonaGenerationPage() {
 
   // 페르소나용 일일 스케줄 생성 함수
   const generateDailySchedule = (persona, facilities) => {
-    // 시설 색상 매핑
-    const facilityColors = {
-      "Cafe": "bg-amber-400",
-      "Library": "bg-blue-500",
-      "Conference Room": "bg-green-500",
-      "Gym": "bg-red-500",
-      "Lounge": "bg-purple-500",
-      "Office": "bg-gray-600",
-      "Lab": "bg-indigo-500",
-      "Study Room": "bg-teal-500",
-      "Dining Hall": "bg-orange-500"
-    };
-    
     // 시간대 설정 - 더 넓은 시간대로 조정
     const timeSlots = [
       "8:00-9:00",
@@ -236,113 +223,82 @@ export default function PersonaGenerationPage() {
     const schedule = [];
     const personality = persona.personality;
     
-    // 페르소나 유형에 따른 주요 시설 및 활동 패턴
-    let primaryFacility, secondaryFacility, activityPattern;
+    // 실제 사용 가능한 시설 목록 사용
+    const actualFacilities = facilities && facilities.length > 0 ? facilities : defaultFacilities.map(f => f.name);
     
-    switch (persona.persona_type) {
-      case "student":
-        primaryFacility = "Library";
-        secondaryFacility = "Study Room";
-        activityPattern = "study-focused";
-        break;
-      case "professional":
-        primaryFacility = "Office";
-        secondaryFacility = "Conference Room";
-        activityPattern = "work-focused";
-        break;
-      case "researcher":
-        primaryFacility = "Lab";
-        secondaryFacility = "Library";
-        activityPattern = "research-focused";
-        break;
-      case "visitor":
-        primaryFacility = "Cafe";
-        secondaryFacility = "Lounge";
-        activityPattern = "social-focused";
-        break;
-      case "staff":
-        primaryFacility = "Office";
-        secondaryFacility = "Conference Room";
-        activityPattern = "management-focused";
-        break;
-      default:
-        primaryFacility = "Cafe";
-        secondaryFacility = "Lounge";
-        activityPattern = "general";
-    }
+    // 색상 할당 함수 (동적)
+    const getFacilityColor = (facilityName) => {
+      // 기본 매핑에 있으면 사용
+      const facilityColors = {
+        "Cafe": "bg-amber-400",
+        "Library": "bg-blue-500",
+        "Conference Room": "bg-green-500",
+        "Gym": "bg-red-500",
+        "Lounge": "bg-purple-500",
+        "Office": "bg-gray-600",
+        "Lab": "bg-indigo-500",
+        "Study Room": "bg-teal-500",
+        "Dining Hall": "bg-orange-500"
+      };
+      
+      if (facilityColors[facilityName]) {
+        return facilityColors[facilityName];
+      }
+      // 없으면 시설 인덱스 기반으로 색상 할당
+      const colors = [
+        "bg-amber-400", "bg-blue-500", "bg-green-500", "bg-red-500",
+        "bg-purple-500", "bg-gray-600", "bg-indigo-500", "bg-teal-500", 
+        "bg-orange-500", "bg-pink-500", "bg-cyan-500", "bg-lime-500"
+      ];
+      const index = actualFacilities.indexOf(facilityName);
+      return colors[index % colors.length] || "bg-gray-500";
+    };
+    
+    // 랜덤하게 시설 선택 (2-3개)
+    const shuffledFacilities = [...actualFacilities].sort(() => 0.5 - Math.random());
+    const primaryFacility = shuffledFacilities[0] || "No visit";
+    const secondaryFacility = shuffledFacilities[1] || shuffledFacilities[0] || "No visit";
+    const lunchFacility = shuffledFacilities[2] || shuffledFacilities[0] || "No visit";
     
     // 스케줄 생성
     timeSlots.forEach((timeSlot, idx) => {
       let location, reasoning;
-      const locationColor = facilityColors[location] || "bg-gray-200";
       
       switch (idx) {
         case 0: // 8:00-9:00 - 하루 시작
-          if (persona.persona_type === "staff") {
-            location = primaryFacility;
-            reasoning = `As a ${persona.details.english_name}, ${persona.details.english_name} starts the day early in the ${location.toLowerCase()} to review overnight reports and plan daily operations.`;
-          } else if (persona.persona_type === "researcher") {
-            location = secondaryFacility;
-            reasoning = `${persona.details.english_name} prefers quiet morning hours in ${location.toLowerCase()} for deep reading and literature review when concentration is highest.`;
-          } else {
-            location = primaryFacility;
-            reasoning = `${persona.details.english_name} begins the day in ${location.toLowerCase()} to start daily activities with a ${personality.split(',')[0].toLowerCase()} approach.`;
-          }
+          location = primaryFacility;
+          reasoning = `${persona.details.english_name} begins the day in ${location.toLowerCase()} to start daily activities with a ${personality.split(',')[0].toLowerCase()} approach.`;
           break;
           
         case 1: // 9:00-12:00 - 오전 주요 활동
-          if (persona.persona_type === "staff") {
-            location = "Cafe";
-            reasoning = `${persona.details.english_name} uses the cafe as an informal meeting space to connect with staff and visitors, building relationships while staying accessible.`;
-          } else if (persona.persona_type === "researcher") {
-            location = primaryFacility;
-            reasoning = `Mid-morning ${location.toLowerCase()} time for experimental work when ${persona.details.english_name} is mentally sharp but energy levels allow for hands-on technical tasks.`;
-          } else {
-            location = primaryFacility;
-            reasoning = `Morning focus time in ${location.toLowerCase()} allows ${persona.details.english_name} to tackle demanding tasks with ${personality.includes('Analytical') ? 'analytical precision' : 'full concentration'}.`;
-          }
+          location = Math.random() > 0.5 ? primaryFacility : secondaryFacility;
+          reasoning = `Morning focus time in ${location.toLowerCase()} allows ${persona.details.english_name} to tackle demanding tasks with ${personality.includes('Analytical') ? 'analytical precision' : 'full concentration'}.`;
           break;
           
         case 2: // 12:00-13:00 - 점심시간
-          location = "Cafe";
+          location = lunchFacility;
           if (personality.includes("Social")) {
-            reasoning = `Social lunch break in cafe provides ${persona.details.english_name} with necessary social interaction to balance their work.`;
+            reasoning = `Social lunch break in ${location.toLowerCase()} provides ${persona.details.english_name} with necessary social interaction to balance their work.`;
           } else {
-            reasoning = `Lunch break in the cafe allows ${persona.details.english_name} to recharge and observe facility usage patterns.`;
+            reasoning = `Lunch break in the ${location.toLowerCase()} allows ${persona.details.english_name} to recharge and take a break from work.`;
           }
           break;
           
         case 3: // 13:00-17:00 - 오후 주요 활동
-          if (persona.persona_type === "staff") {
-            location = secondaryFacility;
-            reasoning = `Afternoon meetings in ${location.toLowerCase()} for strategic planning and departmental coordination - formal business requires dedicated space.`;
-          } else if (persona.persona_type === "researcher") {
-            location = secondaryFacility;
-            reasoning = `Afternoon return to ${location.toLowerCase()} for writing and analysis - post-lunch period suits ${persona.details.english_name}'s preference for reflective, analytical work.`;
-          } else {
-            location = primaryFacility;
-            reasoning = `Afternoon session in ${location.toLowerCase()} for ${persona.persona_type === 'student' ? 'focused study' : 'productive work'} when energy levels stabilize after lunch.`;
-          }
+          location = Math.random() > 0.5 ? secondaryFacility : primaryFacility;
+          reasoning = `Afternoon session in ${location.toLowerCase()} for productive work when energy levels stabilize after lunch.`;
           break;
           
         case 4: // 17:00-18:00 - 하루 마무리
-          if (persona.persona_type === "researcher") {
-            location = primaryFacility;
-            reasoning = `Evening ${location.toLowerCase()} session for running long experiments that can continue overnight - ${persona.details.english_name} optimizes schedule around computational resources.`;
-          } else if (persona.persona_type === "staff") {
-            location = primaryFacility;
-            reasoning = `End-of-day wrap-up in ${location.toLowerCase()} to complete administrative tasks and prepare for next day before building closes.`;
-          } else {
-            location = primaryFacility;
-            reasoning = `Final session in ${location.toLowerCase()} to wrap up daily tasks and prepare for tomorrow with ${personality.split(',')[0].toLowerCase()} attention to detail.`;
-          }
+          location = primaryFacility;
+          reasoning = `Final session in ${location.toLowerCase()} to wrap up daily tasks and prepare for tomorrow with ${personality.split(',')[0].toLowerCase()} attention to detail.`;
           break;
       }
       
       schedule.push({
         time_slot: timeSlot,
         location: location,
-        location_color: facilityColors[location] || "bg-gray-200",
+        location_color: getFacilityColor(location),
         llm_reasoning: reasoning
       });
     });
@@ -405,40 +361,101 @@ export default function PersonaGenerationPage() {
         const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
         const fullName = `${firstName} ${lastName}`;
         
-        // 나이 생성
-        const age = ageGroup === "Under 10" ? Math.floor(Math.random() * 10) + 5 :
-                   ageGroup === "10s" ? Math.floor(Math.random() * 10) + 10 :
-                   ageGroup === "20s" ? Math.floor(Math.random() * 10) + 20 :
-                   ageGroup === "30s" ? Math.floor(Math.random() * 10) + 30 :
-                   ageGroup === "40s" ? Math.floor(Math.random() * 10) + 40 :
-                   Math.floor(Math.random() * 15) + 50;
+        // 나이 생성 (먼저 나이를 정하고, 나이에 맞는 역할 선택)
+        let age, role;
         
-        // 페르소나 유형에 따른 이모지 및 역할 생성
-        let emoji, role;
-        switch (personaType) {
-          case "student":
-            emoji = gender === "Male" ? "🧑" : "👩‍🎓";
-            role = ["Undergraduate Student", "Graduate Student", "PhD Candidate"][Math.floor(Math.random() * 3)];
-            break;
-          case "professional":
-            emoji = gender === "Male" ? "👔" : "👩‍💼";
-            role = ["Software Developer", "Accountant", "Marketing Manager", "Product Manager"][Math.floor(Math.random() * 4)];
-            break;
-          case "researcher":
-            emoji = gender === "Male" ? "🧪" : "👩‍🔬";
-            role = ["Research Scientist", "Senior Researcher", "Lab Director", "Data Analyst"][Math.floor(Math.random() * 4)];
-            break;
-          case "visitor":
-            emoji = gender === "Male" ? "🧳" : "👜";
-            role = ["Client", "Guest Speaker", "Workshop Attendee", "External Consultant"][Math.floor(Math.random() * 4)];
-            break;
-          case "staff":
-            emoji = gender === "Male" ? "🛠" : "👷‍♀️";
-            role = ["Building Manager", "IT Support", "Administrative Assistant", "Facility Manager"][Math.floor(Math.random() * 4)];
-            break;
-          default:
+        if (ageGroup === "Under 10") {
+          age = Math.floor(Math.random() * 5) + 5; // 5-9세
+          role = ["Elementary Student", "Young Learner", "Child Visitor"][Math.floor(Math.random() * 3)];
+        } else if (ageGroup === "10s") {
+          age = Math.floor(Math.random() * 10) + 10; // 10-19세
+          if (age <= 12) {
+            role = ["Elementary Student", "Middle School Student", "Young Visitor"][Math.floor(Math.random() * 3)];
+          } else if (age <= 15) {
+            role = ["Middle School Student", "High School Student", "Student Visitor"][Math.floor(Math.random() * 3)];
+          } else {
+            role = ["High School Student", "Undergraduate Student", "Student Intern"][Math.floor(Math.random() * 3)];
+          }
+        } else if (ageGroup === "20s") {
+          age = Math.floor(Math.random() * 10) + 20; // 20-29세
+          if (personaType === "student") {
+            role = ["Undergraduate Student", "Graduate Student", "PhD Student"][Math.floor(Math.random() * 3)];
+          } else if (personaType === "professional") {
+            role = ["Junior Developer", "Marketing Coordinator", "Junior Analyst", "Entry-level Professional"][Math.floor(Math.random() * 4)];
+          } else if (personaType === "researcher") {
+            role = ["Research Assistant", "Graduate Researcher", "Junior Researcher"][Math.floor(Math.random() * 3)];
+          } else {
+            role = ["Young Professional", "Junior Staff", "Coordinator", "Assistant"][Math.floor(Math.random() * 4)];
+          }
+        } else if (ageGroup === "30s") {
+          age = Math.floor(Math.random() * 10) + 30; // 30-39세
+          if (personaType === "professional") {
+            role = ["Software Developer", "Marketing Manager", "Product Manager", "Senior Analyst"][Math.floor(Math.random() * 4)];
+          } else if (personaType === "researcher") {
+            role = ["Research Scientist", "Senior Researcher", "Project Lead"][Math.floor(Math.random() * 3)];
+          } else if (personaType === "staff") {
+            role = ["Team Lead", "Department Manager", "Senior Staff"][Math.floor(Math.random() * 3)];
+          } else {
+            role = ["Senior Professional", "Manager", "Specialist", "Consultant"][Math.floor(Math.random() * 4)];
+          }
+        } else if (ageGroup === "40s") {
+          age = Math.floor(Math.random() * 10) + 40; // 40-49세
+          if (personaType === "professional") {
+            role = ["Senior Manager", "Director", "Senior Developer", "Principal Consultant"][Math.floor(Math.random() * 4)];
+          } else if (personaType === "researcher") {
+            role = ["Senior Research Scientist", "Research Director", "Principal Investigator"][Math.floor(Math.random() * 3)];
+          } else if (personaType === "staff") {
+            role = ["Department Head", "Senior Manager", "Operations Director"][Math.floor(Math.random() * 3)];
+          } else {
+            role = ["Senior Executive", "Director", "Principal", "Senior Consultant"][Math.floor(Math.random() * 4)];
+          }
+        } else { // 50s+
+          age = Math.floor(Math.random() * 15) + 50; // 50-64세
+          if (personaType === "professional") {
+            role = ["Executive Director", "Senior Director", "Chief Officer", "Principal"][Math.floor(Math.random() * 4)];
+          } else if (personaType === "researcher") {
+            role = ["Research Director", "Chief Scientist", "Principal Investigator", "Lab Director"][Math.floor(Math.random() * 4)];
+          } else if (personaType === "staff") {
+            role = ["Executive Manager", "Senior Director", "Department Head"][Math.floor(Math.random() * 3)];
+          } else {
+            role = ["Senior Executive", "Director", "Chief", "Principal"][Math.floor(Math.random() * 4)];
+          }
+        }
+        
+        // 페르소나 유형에 따른 이모지 생성 (나이와 성별 고려)
+        let emoji;
+        if (age < 13) {
+          emoji = gender === "Male" ? "👦" : "👧";
+        } else if (age < 20) {
+          emoji = gender === "Male" ? "🧑" : "👩";
+        } else if (age < 30) {
+          if (personaType === "student") {
+            emoji = gender === "Male" ? "👨‍🎓" : "👩‍🎓";
+          } else if (personaType === "professional") {
+            emoji = gender === "Male" ? "👨‍💼" : "👩‍💼";
+          } else if (personaType === "researcher") {
+            emoji = gender === "Male" ? "👨‍🔬" : "👩‍🔬";
+          } else {
             emoji = gender === "Male" ? "👨" : "👩";
-            role = "Visitor";
+          }
+        } else if (age < 40) {
+          if (personaType === "professional") {
+            emoji = gender === "Male" ? "👨‍💼" : "👩‍💼";
+          } else if (personaType === "researcher") {
+            emoji = gender === "Male" ? "👨‍🔬" : "👩‍🔬";
+          } else if (personaType === "staff") {
+            emoji = gender === "Male" ? "👨‍💼" : "👩‍💼";
+          } else {
+            emoji = gender === "Male" ? "👨" : "👩";
+          }
+        } else {
+          if (personaType === "professional") {
+            emoji = gender === "Male" ? "👔" : "👩‍💼";
+          } else if (personaType === "researcher") {
+            emoji = gender === "Male" ? "👨‍🔬" : "👩‍🔬";
+          } else {
+            emoji = gender === "Male" ? "👨‍💼" : "👩‍💼";
+          }
         }
         
         // 성격 유형 생성
@@ -568,29 +585,7 @@ export default function PersonaGenerationPage() {
 
   return (
     <div className="w-full bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">PlaceSim</h1>
-              <div className="ml-8">
-                <StageTabs activeStage="Personas" />
-              </div>
-            </div>
-            <button 
-              onClick={() => setShowSettings(true)}
-              className="text-gray-600 hover:text-blue-600 text-sm font-medium flex items-center"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              LLM Settings
-            </button>
-          </div>
-        </div>
-      </nav>
+      
 
       {/* LLM Settings Modal */}
       {showSettings && (
@@ -955,17 +950,11 @@ export default function PersonaGenerationPage() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-100 h-12 flex items-center justify-between px-8 text-sm text-[#666666]">
-        <div>Persona Generation Dashboard v1.0</div>
-        <div className="flex items-center">
-          <span className="mr-3">{llmSettings.apiKey ? `Using ${llmSettings.provider.toUpperCase()} API` : "LLM API Not Configured"}</span>
-          <button 
-            onClick={() => setShowSettings(true)} 
-            className="text-blue-600 hover:text-blue-800 text-xs underline"
-          >
-            Change Settings
-          </button>
+            {/* Footer */}
+            <footer className="bg-gray-800 text-white p-4 mt-8">
+        <div className="max-w-[1600px] mx-auto flex justify-between items-center text-sm">
+          <div>PlaceSim v1.0 - LLM-Driven Simulation</div>
+          <div>CIKM 2025 Demo</div>
         </div>
       </footer>
     </div>
