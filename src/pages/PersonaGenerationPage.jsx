@@ -158,9 +158,9 @@ export default function PersonaGenerationPage() {
     alert("LLM settings saved successfully!");
   };
   
-  // 나이 그룹 옵션
+  // 나이 그룹 옵션 - "Under 10" 제거
   const ageGroupOptions = [
-    "Any", "Under 10", "10s", "20s", "30s", "40s", "50s+"
+    "Any", "10s", "20s", "30s", "40s", "50s+"
   ];
   
   // 성별 옵션
@@ -361,21 +361,13 @@ export default function PersonaGenerationPage() {
         const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
         const fullName = `${firstName} ${lastName}`;
         
-        // 나이 생성 (먼저 나이를 정하고, 나이에 맞는 역할 선택)
+        // 나이 생성 - 16세 이상만 생성되도록 수정
         let age, role;
         
-        if (ageGroup === "Under 10") {
-          age = Math.floor(Math.random() * 5) + 5; // 5-9세
-          role = ["Elementary Student", "Young Learner", "Child Visitor"][Math.floor(Math.random() * 3)];
-        } else if (ageGroup === "10s") {
-          age = Math.floor(Math.random() * 10) + 10; // 10-19세
-          if (age <= 12) {
-            role = ["Elementary Student", "Middle School Student", "Young Visitor"][Math.floor(Math.random() * 3)];
-          } else if (age <= 15) {
-            role = ["Middle School Student", "High School Student", "Student Visitor"][Math.floor(Math.random() * 3)];
-          } else {
-            role = ["High School Student", "Undergraduate Student", "Student Intern"][Math.floor(Math.random() * 3)];
-          }
+        if (ageGroup === "10s") {
+          // 10s는 16-19세만 생성
+          age = Math.floor(Math.random() * 4) + 16; // 16-19세
+          role = ["High School Student", "Undergraduate Student", "Student Intern"][Math.floor(Math.random() * 3)];
         } else if (ageGroup === "20s") {
           age = Math.floor(Math.random() * 10) + 20; // 20-29세
           if (personaType === "student") {
@@ -424,10 +416,12 @@ export default function PersonaGenerationPage() {
         
         // 페르소나 유형에 따른 이모지 생성 (나이와 성별 고려)
         let emoji;
-        if (age < 13) {
-          emoji = gender === "Male" ? "👦" : "👧";
-        } else if (age < 20) {
-          emoji = gender === "Male" ? "🧑" : "👩";
+        if (age < 20) {
+          if (personaType === "student") {
+            emoji = gender === "Male" ? "👨‍🎓" : "👩‍🎓";
+          } else {
+            emoji = gender === "Male" ? "🧑" : "👩";
+          }
         } else if (age < 30) {
           if (personaType === "student") {
             emoji = gender === "Male" ? "👨‍🎓" : "👩‍🎓";
