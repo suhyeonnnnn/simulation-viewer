@@ -35,17 +35,14 @@ const PersonaCard = ({ persona, onSelect, isSelected }) => {
   const personality = persona.details?.personality || persona.personality || "";
   const cardColor = getCardColor(personality);
   
-  // 활동 시간이 세부 정보에 있거나 메인 객체에 있는지 확인
   const activeHours = persona.active_hours || "";
   
-  // 시설 정보는 여러 가지 형태로 있을 수 있음
   const facilities = persona.preferred_facilities 
     ? Array.isArray(persona.preferred_facilities) 
       ? persona.preferred_facilities.join(", ")
       : persona.preferred_facilities
     : "";
   
-  // 페르소나 설명 정보
   const description = persona.profile_prompt || persona.details?.description || "";
 
   return (
@@ -92,10 +89,8 @@ const PersonaCard = ({ persona, onSelect, isSelected }) => {
 };
 
 export default function PersonaGenerationPage() {
-  // React Router의 useNavigate 훅 사용
   const navigate = useNavigate();
 
-  // LLM 설정
   const [llmSettings, setLlmSettings] = useState({
     provider: "openai",
     model: "gpt-4-turbo",
@@ -104,7 +99,6 @@ export default function PersonaGenerationPage() {
     maxTokens: 1000
   });
 
-  // 페르소나 필터링
   const [filter, setFilter] = useState({
     gender: "Any",
     ageGroup: "Any",
@@ -120,7 +114,6 @@ export default function PersonaGenerationPage() {
   const [apiKeyHidden, setApiKeyHidden] = useState(true);
   
   useEffect(() => {
-    // localStorage에서 저장된 LLM 설정 불러오기
     const savedSettings = localStorage.getItem('llmSettings');
     if (savedSettings) {
       try {
@@ -130,16 +123,13 @@ export default function PersonaGenerationPage() {
       }
     }
     
-    // localStorage에서 시설 정보 불러오기
     const storedFacilities = localStorage.getItem('simulationFacilities');
     if (storedFacilities) {
       try {
         const data = JSON.parse(storedFacilities);
-        // 'facilities' 배열이 존재하는 경우
         if (data.facilities && Array.isArray(data.facilities)) {
           setAvailableFacilities(data.facilities.map(f => f.name));
         } 
-        // 직접 배열인 경우 (다른 형식으로 저장된 경우 대비)
         else if (Array.isArray(data)) {
           setAvailableFacilities(data.map(f => f.name));
         }
@@ -150,34 +140,28 @@ export default function PersonaGenerationPage() {
     }
   }, []);
   
-  // LLM 설정 저장
   const saveLlmSettings = () => {
     localStorage.setItem('llmSettings', JSON.stringify(llmSettings));
     setShowSettings(false);
     alert("LLM settings saved successfully!");
   };
   
-  // 나이 그룹 옵션 - "Under 10" 제거
   const ageGroupOptions = [
     "Any", "10s", "20s", "30s", "40s", "50s+"
   ];
   
-  // 성별 옵션
   const genderOptions = ["Any", "Male", "Female"];
   
-  // 페르소나 유형 옵션
   const personaTypeOptions = [
     "Any", "student", "professional", "researcher", "visitor", "staff"
   ];
   
-  // LLM 제공 업체 옵션
   const llmProviderOptions = [
     { value: "openai", label: "OpenAI" },
     { value: "anthropic", label: "Anthropic" },
     { value: "google", label: "Google AI" }
   ];
   
-  // 각 제공업체별 모델 옵션
   const getModelOptions = (provider) => {
     switch (provider) {
       case "openai":
@@ -202,15 +186,12 @@ export default function PersonaGenerationPage() {
     }
   };
   
-  // 기본 시설 (시설 데이터가 없을 경우 대체)
   const defaultFacilities = [
     "Cafe", "Library", "Conference Room", "Gym", "Lounge", 
     "Office", "Lab", "Study Room", "Dining Hall"
   ];
 
-  // 페르소나용 일일 스케줄 생성 함수
   const generateDailySchedule = (persona, facilities) => {
-    // 시간대 설정
     const timeSlots = [
       "8:00-9:00",
       "9:00-12:00", 
@@ -225,15 +206,12 @@ export default function PersonaGenerationPage() {
     const role = persona.details?.role || "Staff";
     const activeHours = persona.active_hours || "Morning";
     
-    // 안전하게 role을 체크하는 헬퍼 함수
     const roleIncludes = (keyword) => {
       return role && typeof role === 'string' && role.includes(keyword);
     };
     
-    // 실제 사용 가능한 시설 목록 사용
     const actualFacilities = facilities && facilities.length > 0 ? facilities : defaultFacilities;
     
-    // 색상 할당 함수 (동적)
     const getFacilityColor = (facilityName) => {
       const facilityColors = {
         "Cafe": "bg-amber-400",
@@ -259,9 +237,7 @@ export default function PersonaGenerationPage() {
       return colors[index % colors.length] || "bg-gray-500";
     };
     
-    // 페르소나 타입과 역할에 따른 주요 활동 장소 결정
     const getPrimaryWorkspace = () => {
-      // Student 계열
       if (personaType === "student" || roleIncludes("Student")) {
         const studentSpaces = actualFacilities.filter(f => 
           f.includes("Library") || f.includes("Study") || f.includes("Lab")
@@ -270,7 +246,6 @@ export default function PersonaGenerationPage() {
         return actualFacilities.find(f => f.includes("Library")) || actualFacilities[0];
       }
       
-      // Researcher 계열
       if (personaType === "researcher" || roleIncludes("Research") || roleIncludes("Scientist")) {
         const researchSpaces = actualFacilities.filter(f => 
           f.includes("Lab") || f.includes("Office") || f.includes("Study")
@@ -279,7 +254,6 @@ export default function PersonaGenerationPage() {
         return actualFacilities.find(f => f.includes("Lab")) || actualFacilities[0];
       }
       
-      // Professional/Staff 계열
       if (personaType === "professional" || personaType === "staff" || 
           roleIncludes("Manager") || roleIncludes("Director") || roleIncludes("Developer")) {
         const workSpaces = actualFacilities.filter(f => 
@@ -292,7 +266,6 @@ export default function PersonaGenerationPage() {
       return actualFacilities[0];
     };
     
-    // 점심 장소 결정
     const getLunchLocation = () => {
       const lunchSpaces = actualFacilities.filter(f => 
         f.includes("Cafe") || f.includes("Dining") || f.includes("Lounge")
@@ -301,7 +274,6 @@ export default function PersonaGenerationPage() {
       return actualFacilities.find(f => f.includes("Cafe")) || actualFacilities[0];
     };
     
-    // 협업/미팅 장소 결정
     const getMeetingLocation = () => {
       const meetingSpaces = actualFacilities.filter(f => 
         f.includes("Conference") || f.includes("Lounge") || f.includes("Office")
@@ -310,7 +282,6 @@ export default function PersonaGenerationPage() {
       return actualFacilities.find(f => f.includes("Conference")) || actualFacilities[0];
     };
     
-    // 여가/휴식 장소 결정
     const getBreakLocation = () => {
       const breakSpaces = actualFacilities.filter(f => 
         f.includes("Lounge") || f.includes("Cafe") || f.includes("Gym")
@@ -324,36 +295,30 @@ export default function PersonaGenerationPage() {
     const meetingLocation = getMeetingLocation();
     const breakLocation = getBreakLocation();
     
-    // 성격과 활동 시간에 따른 하루 패턴 결정
     const isSocial = personality.includes("Social") || personality.includes("outgoing");
     const isAnalytical = personality.includes("Analytical") || personality.includes("detail-oriented");
     const isCreative = personality.includes("Creative") || personality.includes("innovative");
     const isEvening = activeHours === "Evening";
     
-    // 스케줄 생성
     timeSlots.forEach((timeSlot, idx) => {
       let location, reasoning;
       
       switch (idx) {
-        case 0: // 8:00-9:00 - 하루 시작
+        case 0:
           if (isEvening) {
-            // 저녁형 인간은 아침에 여유롭게
             location = breakLocation;
             reasoning = `As an evening person, ${persona.details.english_name} starts slowly with a relaxed morning in the ${location.toLowerCase()}.`;
           } else {
-            // 아침형이거나 일반적인 경우
             location = primaryWorkspace;
             reasoning = `${persona.details.english_name} arrives early at the ${location.toLowerCase()} to ${isAnalytical ? 'organize the day ahead' : 'get a head start on tasks'}.`;
           }
           break;
           
-        case 1: // 9:00-12:00 - 오전 주요 활동
+        case 1:
           if (isSocial && Math.random() > 0.5) {
-            // 사교적인 사람은 때때로 협업 공간
             location = meetingLocation;
             reasoning = `${persona.details.english_name} engages in collaborative work at the ${location.toLowerCase()}, leveraging their social nature to ${roleIncludes("Manager") || roleIncludes("Director") ? 'lead team discussions' : 'work with colleagues'}.`;
           } else {
-            // 주 업무 공간에서 집중
             location = primaryWorkspace;
             if (isAnalytical) {
               reasoning = `Morning deep work session in the ${location.toLowerCase()} where ${persona.details.english_name} tackles complex ${roleIncludes("Research") ? 'research problems' : roleIncludes("Student") ? 'assignments' : 'projects'} with analytical precision.`;
@@ -365,7 +330,7 @@ export default function PersonaGenerationPage() {
           }
           break;
           
-        case 2: // 12:00-13:00 - 점심시간
+        case 2:
           location = lunchLocation;
           if (isSocial) {
             reasoning = `Lunch break at the ${location.toLowerCase()} provides ${persona.details.english_name} with essential social interaction and networking opportunities.`;
@@ -376,33 +341,27 @@ export default function PersonaGenerationPage() {
           }
           break;
           
-        case 3: // 13:00-17:00 - 오후 주요 활동
+        case 3:
           if (isEvening) {
-            // 저녁형 인간은 오후에 활발
             location = primaryWorkspace;
             reasoning = `Peak productivity hours for ${persona.details.english_name} in the ${location.toLowerCase()}, tackling the most demanding ${roleIncludes("Research") ? 'research experiments' : roleIncludes("Student") ? 'study sessions' : 'tasks'} with full energy.`;
           } else if (isSocial && Math.random() > 0.6) {
-            // 사교적인 사람은 오후 미팅/협업
             location = meetingLocation;
             reasoning = `Afternoon collaboration session in the ${location.toLowerCase()} where ${persona.details.english_name} ${roleIncludes("Manager") || roleIncludes("Director") ? 'facilitates important meetings' : 'coordinates with team members'}.`;
           } else {
-            // 일반적인 오후 업무
             location = primaryWorkspace;
             reasoning = `${persona.details.english_name} continues productive work in the ${location.toLowerCase()}, ${isAnalytical ? 'reviewing and refining deliverables' : 'making steady progress on ongoing projects'}.`;
           }
           break;
           
-        case 4: // 17:00-18:00 - 하루 마무리
+        case 4:
           if (personality.includes("Active") || personality.includes("Gym") || Math.random() > 0.7) {
-            // 활동적인 사람은 운동/휴식
             location = breakLocation;
             reasoning = `${persona.details.english_name} winds down with ${breakLocation.includes("Gym") ? 'an evening workout' : 'some leisure time'} at the ${location.toLowerCase()} before heading home.`;
           } else if (roleIncludes("Manager") || roleIncludes("Director") || roleIncludes("Senior")) {
-            // 시니어급은 업무 정리
             location = primaryWorkspace;
             reasoning = `End-of-day wrap-up in the ${location.toLowerCase()} where ${persona.details.english_name} ${isAnalytical ? 'reviews the day and plans tomorrow' : 'ties up loose ends and prepares for the next day'}.`;
           } else {
-            // 일반적으로 주 업무 공간에서 마무리
             location = Math.random() > 0.5 ? primaryWorkspace : breakLocation;
             if (location === primaryWorkspace) {
               reasoning = `${persona.details.english_name} completes final tasks in the ${location.toLowerCase()} before ending the workday.`;
@@ -429,37 +388,17 @@ export default function PersonaGenerationPage() {
     return schedule;
   };
 
-  // LLM을 사용한 실제 페르소나 생성 함수
-  // 여기서는 실제 API 호출은 생략하고 형식만 맞춘 예시 데이터를 생성합니다
   const generatePersonas = () => {
     setLoading(true);
     
-    // 실제 구현에서는 여기서 LLM API 호출이 이루어집니다
-    // const response = await fetch('/api/generate-personas', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({
-    //     llmSettings,
-    //     filter,
-    //     facilities: availableFacilities
-    //   })
-    // });
-    // const data = await response.json();
-    // setPersonas(data.personas);
-    
-    // 데모 목적으로 시간 지연 후 샘플 데이터 생성
     setTimeout(() => {
       const newPersonas = [];
       const count = filter.count;
       const facilitiesToUse = availableFacilities.length > 0 ? 
                               availableFacilities : defaultFacilities;
       
-      // 페르소나 유형 옵션
       const personaTypes = ["student", "professional", "researcher", "visitor", "staff"];
       
-      // 샘플 이름
       const maleFirstNames = ["James", "William", "Mason", "Ethan", "Michael", "Aiden", "Liam", "Noah"];
       const femaleFirstNames = ["Emma", "Olivia", "Ava", "Isabella", "Sophia", "Mia", "Charlotte", "Amelia"];
       const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis"];
@@ -477,22 +416,19 @@ export default function PersonaGenerationPage() {
           ? personaTypes[Math.floor(Math.random() * personaTypes.length)]
           : filter.personaType;
         
-        // 이름 생성
         const firstName = gender === "Male" 
           ? maleFirstNames[Math.floor(Math.random() * maleFirstNames.length)]
           : femaleFirstNames[Math.floor(Math.random() * femaleFirstNames.length)];
         const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
         const fullName = `${firstName} ${lastName}`;
         
-        // 나이 생성 - 16세 이상만 생성되도록 수정
         let age, role;
         
         if (ageGroup === "10s") {
-          // 10s는 16-19세만 생성
-          age = Math.floor(Math.random() * 4) + 16; // 16-19세
+          age = Math.floor(Math.random() * 4) + 16;
           role = ["High School Student", "Undergraduate Student", "Student Intern"][Math.floor(Math.random() * 3)];
         } else if (ageGroup === "20s") {
-          age = Math.floor(Math.random() * 10) + 20; // 20-29세
+          age = Math.floor(Math.random() * 10) + 20;
           if (personaType === "student") {
             role = ["Undergraduate Student", "Graduate Student", "PhD Student"][Math.floor(Math.random() * 3)];
           } else if (personaType === "professional") {
@@ -503,7 +439,7 @@ export default function PersonaGenerationPage() {
             role = ["Young Professional", "Junior Staff", "Coordinator", "Assistant"][Math.floor(Math.random() * 4)];
           }
         } else if (ageGroup === "30s") {
-          age = Math.floor(Math.random() * 10) + 30; // 30-39세
+          age = Math.floor(Math.random() * 10) + 30;
           if (personaType === "professional") {
             role = ["Software Developer", "Marketing Manager", "Product Manager", "Senior Analyst"][Math.floor(Math.random() * 4)];
           } else if (personaType === "researcher") {
@@ -514,7 +450,7 @@ export default function PersonaGenerationPage() {
             role = ["Senior Professional", "Manager", "Specialist", "Consultant"][Math.floor(Math.random() * 4)];
           }
         } else if (ageGroup === "40s") {
-          age = Math.floor(Math.random() * 10) + 40; // 40-49세
+          age = Math.floor(Math.random() * 10) + 40;
           if (personaType === "professional") {
             role = ["Senior Manager", "Director", "Senior Developer", "Principal Consultant"][Math.floor(Math.random() * 4)];
           } else if (personaType === "researcher") {
@@ -524,8 +460,8 @@ export default function PersonaGenerationPage() {
           } else {
             role = ["Senior Executive", "Director", "Principal", "Senior Consultant"][Math.floor(Math.random() * 4)];
           }
-        } else { // 50s+
-          age = Math.floor(Math.random() * 15) + 50; // 50-64세
+        } else {
+          age = Math.floor(Math.random() * 15) + 50;
           if (personaType === "professional") {
             role = ["Executive Director", "Senior Director", "Chief Officer", "Principal"][Math.floor(Math.random() * 4)];
           } else if (personaType === "researcher") {
@@ -537,7 +473,16 @@ export default function PersonaGenerationPage() {
           }
         }
         
-        // 페르소나 유형에 따른 이모지 생성 (나이와 성별 고려)
+        // 안전장치 1: 나이 강제 검증
+        if (!age || age < 16) {
+          console.warn(`⚠️ Invalid age detected (${age}). Forcing to 20s. AgeGroup was: ${ageGroup}`);
+          age = Math.floor(Math.random() * 10) + 20;
+          role = role || "Young Professional";
+        }
+        
+        // 디버깅용 로그
+        console.log(`✅ Generated persona ${i}: Age ${age}, AgeGroup: ${ageGroup}, Role: ${role}`);
+        
         let emoji;
         if (age < 20) {
           if (personaType === "student") {
@@ -575,7 +520,6 @@ export default function PersonaGenerationPage() {
           }
         }
         
-        // 성격 유형 생성
         const personalityTypes = [
           "Analytical, detail-oriented, methodical",
           "Creative, innovative, big-picture thinker",
@@ -585,10 +529,8 @@ export default function PersonaGenerationPage() {
         ];
         const personality = personalityTypes[Math.floor(Math.random() * personalityTypes.length)];
         
-        // 활동 시간대
         const activeHours = ["Morning", "Afternoon", "Evening"][Math.floor(Math.random() * 3)];
         
-        // 프로필 설명 생성
         const descriptions = [
           `A ${personality.toLowerCase()} ${role.toLowerCase()} who prefers working during ${activeHours.toLowerCase()} hours.`,
           `${fullName} is a ${age}-year-old ${gender.toLowerCase()} who works as a ${role.toLowerCase()}. They are ${personality.toLowerCase()}.`,
@@ -597,7 +539,6 @@ export default function PersonaGenerationPage() {
         ];
         const description = descriptions[Math.floor(Math.random() * descriptions.length)];
         
-        // 페르소나 객체 생성
         const newPersona = {
           id: i,
           name: firstName,
@@ -625,9 +566,12 @@ export default function PersonaGenerationPage() {
           )
         };
         
-        // 16세 미만 페르소나는 절대 추가하지 않음 (안전장치)
+        // 안전장치 2: 배열 추가 전 최종 검증
         if (age >= 16) {
           newPersonas.push(newPersona);
+          console.log(`✅ Added persona ${i} (Age ${age}) to list`);
+        } else {
+          console.error(`🚫 BLOCKED: Persona ${i} with age ${age} was NOT added`);
         }
       }
       
@@ -636,61 +580,43 @@ export default function PersonaGenerationPage() {
     }, 1500);
   };
   
-  // 선택한 페르소나 시뮬레이션용 저장
   const proceedToSimulation = () => {
     if (selectedPersonas.length === 0) {
       alert("Please select at least one persona for simulation.");
       return;
     }
     
-    // JSON 데이터 생성
     const jsonData = {
       personas: selectedPersonas
     };
     
-    // localStorage에 저장
     localStorage.setItem('simulationPersonas', JSON.stringify(jsonData));
     
-    // 저장된 데이터 확인
     console.log('Saved personas data:', jsonData);
     
-    // 다운로드 옵션 제공
     if (window.confirm(`${selectedPersonas.length} personas saved! Do you want to download the JSON file?`)) {
       downloadPersonasJson(jsonData);
     }
     
-    // 시뮬레이션으로 이동
     navigate('/simulation');
   };
   
-  // 페르소나 JSON 파일 다운로드 함수
   const downloadPersonasJson = (jsonData) => {
-    // JSON 데이터를 문자열로 변환
     const jsonString = JSON.stringify(jsonData, null, 2);
-    
-    // Blob 생성
     const blob = new Blob([jsonString], { type: 'application/json' });
-    
-    // 다운로드 링크 생성
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = 'personas.json';
-    
-    // 링크 클릭하여 다운로드 시작
     document.body.appendChild(a);
     a.click();
-    
-    // 정리
     setTimeout(() => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }, 0);
-    
     alert("personas.json file has been downloaded.");
   };
   
-  // 페르소나 선택 토글
   const togglePersonaSelection = (persona) => {
     if (selectedPersonas.some(p => p.id === persona.id)) {
       setSelectedPersonas(selectedPersonas.filter(p => p.id !== persona.id));
@@ -701,9 +627,6 @@ export default function PersonaGenerationPage() {
 
   return (
     <div className="w-full bg-gray-50">
-      
-
-      {/* LLM Settings Modal */}
       {showSettings && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -868,13 +791,11 @@ export default function PersonaGenerationPage() {
         </div>
       )}
 
-      {/* Main Content */}
       <main className="flex-1 max-w-7xl mx-auto px-4 py-8 w-full">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">
           Create Community Facility User Personas
         </h2>
 
-        {/* LLM Status Banner */}
         <div className={`mb-6 rounded-lg p-4 ${llmSettings.apiKey ? "bg-green-50 border border-green-200" : "bg-yellow-50 border border-yellow-200"}`}>
           <div className="flex items-start">
             <div className={`flex-shrink-0 mt-0.5 ${llmSettings.apiKey ? "text-green-500" : "text-yellow-500"}`}>
@@ -913,7 +834,6 @@ export default function PersonaGenerationPage() {
           </div>
         </div>
         
-        {/* Facility Alert */}
         {availableFacilities.length === 0 && (
           <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
             <div className="flex">
@@ -931,7 +851,6 @@ export default function PersonaGenerationPage() {
           </div>
         )}
 
-        {/* Filter and Control Section */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h3 className="text-lg font-semibold mb-4">Persona Generation Options</h3>
           
@@ -1003,7 +922,6 @@ export default function PersonaGenerationPage() {
           </div>
         </div>
 
-        {/* Selected Personas Section */}
         {selectedPersonas.length > 0 && (
           <div className="bg-white rounded-lg shadow p-6 mb-6">
             <h3 className="text-lg font-semibold mb-4">Selected Personas</h3>
@@ -1032,7 +950,6 @@ export default function PersonaGenerationPage() {
           </div>
         )}
 
-        {/* Persona Cards Grid */}
         {personas.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {personas.map((persona) => (
@@ -1066,8 +983,7 @@ export default function PersonaGenerationPage() {
         )}
       </main>
 
-            {/* Footer */}
-            <footer className="bg-gray-800 text-white p-4 mt-8">
+      <footer className="bg-gray-800 text-white p-4 mt-8">
         <div className="max-w-[1600px] mx-auto flex justify-between items-center text-sm">
           <div>PlaceSim v1.0 - LLM-Driven Simulation</div>
           <div>CIKM 2025 Demo</div>
