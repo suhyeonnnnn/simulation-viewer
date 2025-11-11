@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 // PersonaCard Component
 const PersonaCard = ({ persona, onSelect, isSelected }) => {
   const getEmoji = (age, gender) => {
-    if (age.includes("10s") && gender === "Male") return "👦";
-    if (age.includes("10s") && gender === "Female") return "👧";
+    if (age.includes("10s") && gender === "Male") return "🧑";
+    if (age.includes("10s") && gender === "Female") return "👩";
     if (age.includes("20s") && gender === "Male") return "👨";
     if (age.includes("20s") && gender === "Female") return "👩";
     if (age.includes("30s") && gender === "Male") return "👨";
@@ -220,10 +220,15 @@ export default function PersonaGenerationPage() {
     ];
     
     const schedule = [];
-    const personality = persona.personality;
-    const personaType = persona.persona_type;
-    const role = persona.details.role;
-    const activeHours = persona.active_hours;
+    const personality = persona.personality || "";
+    const personaType = persona.persona_type || "professional";
+    const role = persona.details?.role || "Staff";
+    const activeHours = persona.active_hours || "Morning";
+    
+    // 안전하게 role을 체크하는 헬퍼 함수
+    const roleIncludes = (keyword) => {
+      return role && typeof role === 'string' && role.includes(keyword);
+    };
     
     // 실제 사용 가능한 시설 목록 사용
     const actualFacilities = facilities && facilities.length > 0 ? facilities : defaultFacilities;
@@ -257,7 +262,7 @@ export default function PersonaGenerationPage() {
     // 페르소나 타입과 역할에 따른 주요 활동 장소 결정
     const getPrimaryWorkspace = () => {
       // Student 계열
-      if (personaType === "student" || role.includes("Student")) {
+      if (personaType === "student" || roleIncludes("Student")) {
         const studentSpaces = actualFacilities.filter(f => 
           f.includes("Library") || f.includes("Study") || f.includes("Lab")
         );
@@ -266,7 +271,7 @@ export default function PersonaGenerationPage() {
       }
       
       // Researcher 계열
-      if (personaType === "researcher" || role.includes("Research") || role.includes("Scientist")) {
+      if (personaType === "researcher" || roleIncludes("Research") || roleIncludes("Scientist")) {
         const researchSpaces = actualFacilities.filter(f => 
           f.includes("Lab") || f.includes("Office") || f.includes("Study")
         );
@@ -276,7 +281,7 @@ export default function PersonaGenerationPage() {
       
       // Professional/Staff 계열
       if (personaType === "professional" || personaType === "staff" || 
-          role.includes("Manager") || role.includes("Director") || role.includes("Developer")) {
+          roleIncludes("Manager") || roleIncludes("Director") || roleIncludes("Developer")) {
         const workSpaces = actualFacilities.filter(f => 
           f.includes("Office") || f.includes("Conference")
         );
@@ -346,16 +351,16 @@ export default function PersonaGenerationPage() {
           if (isSocial && Math.random() > 0.5) {
             // 사교적인 사람은 때때로 협업 공간
             location = meetingLocation;
-            reasoning = `${persona.details.english_name} engages in collaborative work at the ${location.toLowerCase()}, leveraging their social nature to ${role.includes("Manager") || role.includes("Director") ? 'lead team discussions' : 'work with colleagues'}.`;
+            reasoning = `${persona.details.english_name} engages in collaborative work at the ${location.toLowerCase()}, leveraging their social nature to ${roleIncludes("Manager") || roleIncludes("Director") ? 'lead team discussions' : 'work with colleagues'}.`;
           } else {
             // 주 업무 공간에서 집중
             location = primaryWorkspace;
             if (isAnalytical) {
-              reasoning = `Morning deep work session in the ${location.toLowerCase()} where ${persona.details.english_name} tackles complex ${role.includes("Research") ? 'research problems' : role.includes("Student") ? 'assignments' : 'projects'} with analytical precision.`;
+              reasoning = `Morning deep work session in the ${location.toLowerCase()} where ${persona.details.english_name} tackles complex ${roleIncludes("Research") ? 'research problems' : roleIncludes("Student") ? 'assignments' : 'projects'} with analytical precision.`;
             } else if (isCreative) {
-              reasoning = `${persona.details.english_name} spends creative morning hours in the ${location.toLowerCase()}, working on ${role.includes("Student") ? 'innovative projects' : role.includes("Research") ? 'experimental approaches' : 'new initiatives'}.`;
+              reasoning = `${persona.details.english_name} spends creative morning hours in the ${location.toLowerCase()}, working on ${roleIncludes("Student") ? 'innovative projects' : roleIncludes("Research") ? 'experimental approaches' : 'new initiatives'}.`;
             } else {
-              reasoning = `Focused morning work session in the ${location.toLowerCase()} where ${persona.details.english_name} makes significant progress on ${role.includes("Student") ? 'coursework' : 'key deliverables'}.`;
+              reasoning = `Focused morning work session in the ${location.toLowerCase()} where ${persona.details.english_name} makes significant progress on ${roleIncludes("Student") ? 'coursework' : 'key deliverables'}.`;
             }
           }
           break;
@@ -375,11 +380,11 @@ export default function PersonaGenerationPage() {
           if (isEvening) {
             // 저녁형 인간은 오후에 활발
             location = primaryWorkspace;
-            reasoning = `Peak productivity hours for ${persona.details.english_name} in the ${location.toLowerCase()}, tackling the most demanding ${role.includes("Research") ? 'research experiments' : role.includes("Student") ? 'study sessions' : 'tasks'} with full energy.`;
+            reasoning = `Peak productivity hours for ${persona.details.english_name} in the ${location.toLowerCase()}, tackling the most demanding ${roleIncludes("Research") ? 'research experiments' : roleIncludes("Student") ? 'study sessions' : 'tasks'} with full energy.`;
           } else if (isSocial && Math.random() > 0.6) {
             // 사교적인 사람은 오후 미팅/협업
             location = meetingLocation;
-            reasoning = `Afternoon collaboration session in the ${location.toLowerCase()} where ${persona.details.english_name} ${role.includes("Manager") || role.includes("Director") ? 'facilitates important meetings' : 'coordinates with team members'}.`;
+            reasoning = `Afternoon collaboration session in the ${location.toLowerCase()} where ${persona.details.english_name} ${roleIncludes("Manager") || roleIncludes("Director") ? 'facilitates important meetings' : 'coordinates with team members'}.`;
           } else {
             // 일반적인 오후 업무
             location = primaryWorkspace;
@@ -392,7 +397,7 @@ export default function PersonaGenerationPage() {
             // 활동적인 사람은 운동/휴식
             location = breakLocation;
             reasoning = `${persona.details.english_name} winds down with ${breakLocation.includes("Gym") ? 'an evening workout' : 'some leisure time'} at the ${location.toLowerCase()} before heading home.`;
-          } else if (role.includes("Manager") || role.includes("Director") || role.includes("Senior")) {
+          } else if (roleIncludes("Manager") || roleIncludes("Director") || roleIncludes("Senior")) {
             // 시니어급은 업무 정리
             location = primaryWorkspace;
             reasoning = `End-of-day wrap-up in the ${location.toLowerCase()} where ${persona.details.english_name} ${isAnalytical ? 'reviews the day and plans tomorrow' : 'ties up loose ends and prepares for the next day'}.`;
@@ -612,14 +617,18 @@ export default function PersonaGenerationPage() {
               personality: personality,
               persona_type: personaType,
               details: {
-                english_name: firstName
+                english_name: firstName,
+                role: role
               }
             }, 
             facilitiesToUse
           )
         };
         
-        newPersonas.push(newPersona);
+        // 16세 미만 페르소나는 절대 추가하지 않음 (안전장치)
+        if (age >= 16) {
+          newPersonas.push(newPersona);
+        }
       }
       
       setPersonas(newPersonas);
