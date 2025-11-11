@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import StageTabs from "../components/StageTabs";
 
 // PersonaCard Component
 const PersonaCard = ({ persona, onSelect, isSelected }) => {
@@ -211,7 +210,7 @@ export default function PersonaGenerationPage() {
 
   // 페르소나용 일일 스케줄 생성 함수
   const generateDailySchedule = (persona, facilities) => {
-    // 시간대 설정 - 더 넓은 시간대로 조정
+    // 시간대 설정
     const timeSlots = [
       "8:00-9:00",
       "9:00-12:00", 
@@ -222,13 +221,15 @@ export default function PersonaGenerationPage() {
     
     const schedule = [];
     const personality = persona.personality;
+    const personaType = persona.persona_type;
+    const role = persona.details.role;
+    const activeHours = persona.active_hours;
     
     // 실제 사용 가능한 시설 목록 사용
-    const actualFacilities = facilities && facilities.length > 0 ? facilities : defaultFacilities.map(f => f.name);
+    const actualFacilities = facilities && facilities.length > 0 ? facilities : defaultFacilities;
     
     // 색상 할당 함수 (동적)
     const getFacilityColor = (facilityName) => {
-      // 기본 매핑에 있으면 사용
       const facilityColors = {
         "Cafe": "bg-amber-400",
         "Library": "bg-blue-500",
@@ -244,7 +245,6 @@ export default function PersonaGenerationPage() {
       if (facilityColors[facilityName]) {
         return facilityColors[facilityName];
       }
-      // 없으면 시설 인덱스 기반으로 색상 할당
       const colors = [
         "bg-amber-400", "bg-blue-500", "bg-green-500", "bg-red-500",
         "bg-purple-500", "bg-gray-600", "bg-indigo-500", "bg-teal-500", 
@@ -254,11 +254,76 @@ export default function PersonaGenerationPage() {
       return colors[index % colors.length] || "bg-gray-500";
     };
     
-    // 랜덤하게 시설 선택 (2-3개)
-    const shuffledFacilities = [...actualFacilities].sort(() => 0.5 - Math.random());
-    const primaryFacility = shuffledFacilities[0] || "No visit";
-    const secondaryFacility = shuffledFacilities[1] || shuffledFacilities[0] || "No visit";
-    const lunchFacility = shuffledFacilities[2] || shuffledFacilities[0] || "No visit";
+    // 페르소나 타입과 역할에 따른 주요 활동 장소 결정
+    const getPrimaryWorkspace = () => {
+      // Student 계열
+      if (personaType === "student" || role.includes("Student")) {
+        const studentSpaces = actualFacilities.filter(f => 
+          f.includes("Library") || f.includes("Study") || f.includes("Lab")
+        );
+        if (studentSpaces.length > 0) return studentSpaces[Math.floor(Math.random() * studentSpaces.length)];
+        return actualFacilities.find(f => f.includes("Library")) || actualFacilities[0];
+      }
+      
+      // Researcher 계열
+      if (personaType === "researcher" || role.includes("Research") || role.includes("Scientist")) {
+        const researchSpaces = actualFacilities.filter(f => 
+          f.includes("Lab") || f.includes("Office") || f.includes("Study")
+        );
+        if (researchSpaces.length > 0) return researchSpaces[Math.floor(Math.random() * researchSpaces.length)];
+        return actualFacilities.find(f => f.includes("Lab")) || actualFacilities[0];
+      }
+      
+      // Professional/Staff 계열
+      if (personaType === "professional" || personaType === "staff" || 
+          role.includes("Manager") || role.includes("Director") || role.includes("Developer")) {
+        const workSpaces = actualFacilities.filter(f => 
+          f.includes("Office") || f.includes("Conference")
+        );
+        if (workSpaces.length > 0) return workSpaces[Math.floor(Math.random() * workSpaces.length)];
+        return actualFacilities.find(f => f.includes("Office")) || actualFacilities[0];
+      }
+      
+      return actualFacilities[0];
+    };
+    
+    // 점심 장소 결정
+    const getLunchLocation = () => {
+      const lunchSpaces = actualFacilities.filter(f => 
+        f.includes("Cafe") || f.includes("Dining") || f.includes("Lounge")
+      );
+      if (lunchSpaces.length > 0) return lunchSpaces[Math.floor(Math.random() * lunchSpaces.length)];
+      return actualFacilities.find(f => f.includes("Cafe")) || actualFacilities[0];
+    };
+    
+    // 협업/미팅 장소 결정
+    const getMeetingLocation = () => {
+      const meetingSpaces = actualFacilities.filter(f => 
+        f.includes("Conference") || f.includes("Lounge") || f.includes("Office")
+      );
+      if (meetingSpaces.length > 0) return meetingSpaces[Math.floor(Math.random() * meetingSpaces.length)];
+      return actualFacilities.find(f => f.includes("Conference")) || actualFacilities[0];
+    };
+    
+    // 여가/휴식 장소 결정
+    const getBreakLocation = () => {
+      const breakSpaces = actualFacilities.filter(f => 
+        f.includes("Lounge") || f.includes("Cafe") || f.includes("Gym")
+      );
+      if (breakSpaces.length > 0) return breakSpaces[Math.floor(Math.random() * breakSpaces.length)];
+      return actualFacilities.find(f => f.includes("Lounge")) || actualFacilities[0];
+    };
+    
+    const primaryWorkspace = getPrimaryWorkspace();
+    const lunchLocation = getLunchLocation();
+    const meetingLocation = getMeetingLocation();
+    const breakLocation = getBreakLocation();
+    
+    // 성격과 활동 시간에 따른 하루 패턴 결정
+    const isSocial = personality.includes("Social") || personality.includes("outgoing");
+    const isAnalytical = personality.includes("Analytical") || personality.includes("detail-oriented");
+    const isCreative = personality.includes("Creative") || personality.includes("innovative");
+    const isEvening = activeHours === "Evening";
     
     // 스케줄 생성
     timeSlots.forEach((timeSlot, idx) => {
@@ -266,32 +331,85 @@ export default function PersonaGenerationPage() {
       
       switch (idx) {
         case 0: // 8:00-9:00 - 하루 시작
-          location = primaryFacility;
-          reasoning = `${persona.details.english_name} begins the day in ${location.toLowerCase()} to start daily activities with a ${personality.split(',')[0].toLowerCase()} approach.`;
+          if (isEvening) {
+            // 저녁형 인간은 아침에 여유롭게
+            location = breakLocation;
+            reasoning = `As an evening person, ${persona.details.english_name} starts slowly with a relaxed morning in the ${location.toLowerCase()}.`;
+          } else {
+            // 아침형이거나 일반적인 경우
+            location = primaryWorkspace;
+            reasoning = `${persona.details.english_name} arrives early at the ${location.toLowerCase()} to ${isAnalytical ? 'organize the day ahead' : 'get a head start on tasks'}.`;
+          }
           break;
           
         case 1: // 9:00-12:00 - 오전 주요 활동
-          location = Math.random() > 0.5 ? primaryFacility : secondaryFacility;
-          reasoning = `Morning focus time in ${location.toLowerCase()} allows ${persona.details.english_name} to tackle demanding tasks with ${personality.includes('Analytical') ? 'analytical precision' : 'full concentration'}.`;
+          if (isSocial && Math.random() > 0.5) {
+            // 사교적인 사람은 때때로 협업 공간
+            location = meetingLocation;
+            reasoning = `${persona.details.english_name} engages in collaborative work at the ${location.toLowerCase()}, leveraging their social nature to ${role.includes("Manager") || role.includes("Director") ? 'lead team discussions' : 'work with colleagues'}.`;
+          } else {
+            // 주 업무 공간에서 집중
+            location = primaryWorkspace;
+            if (isAnalytical) {
+              reasoning = `Morning deep work session in the ${location.toLowerCase()} where ${persona.details.english_name} tackles complex ${role.includes("Research") ? 'research problems' : role.includes("Student") ? 'assignments' : 'projects'} with analytical precision.`;
+            } else if (isCreative) {
+              reasoning = `${persona.details.english_name} spends creative morning hours in the ${location.toLowerCase()}, working on ${role.includes("Student") ? 'innovative projects' : role.includes("Research") ? 'experimental approaches' : 'new initiatives'}.`;
+            } else {
+              reasoning = `Focused morning work session in the ${location.toLowerCase()} where ${persona.details.english_name} makes significant progress on ${role.includes("Student") ? 'coursework' : 'key deliverables'}.`;
+            }
+          }
           break;
           
         case 2: // 12:00-13:00 - 점심시간
-          location = lunchFacility;
-          if (personality.includes("Social")) {
-            reasoning = `Social lunch break in ${location.toLowerCase()} provides ${persona.details.english_name} with necessary social interaction to balance their work.`;
+          location = lunchLocation;
+          if (isSocial) {
+            reasoning = `Lunch break at the ${location.toLowerCase()} provides ${persona.details.english_name} with essential social interaction and networking opportunities.`;
+          } else if (personality.includes("Reserved")) {
+            reasoning = `${persona.details.english_name} takes a quiet lunch break in the ${location.toLowerCase()} to recharge and reflect on the morning's work.`;
           } else {
-            reasoning = `Lunch break in the ${location.toLowerCase()} allows ${persona.details.english_name} to recharge and take a break from work.`;
+            reasoning = `Midday break at the ${location.toLowerCase()} allows ${persona.details.english_name} to refuel and prepare for the afternoon ahead.`;
           }
           break;
           
         case 3: // 13:00-17:00 - 오후 주요 활동
-          location = Math.random() > 0.5 ? secondaryFacility : primaryFacility;
-          reasoning = `Afternoon session in ${location.toLowerCase()} for productive work when energy levels stabilize after lunch.`;
+          if (isEvening) {
+            // 저녁형 인간은 오후에 활발
+            location = primaryWorkspace;
+            reasoning = `Peak productivity hours for ${persona.details.english_name} in the ${location.toLowerCase()}, tackling the most demanding ${role.includes("Research") ? 'research experiments' : role.includes("Student") ? 'study sessions' : 'tasks'} with full energy.`;
+          } else if (isSocial && Math.random() > 0.6) {
+            // 사교적인 사람은 오후 미팅/협업
+            location = meetingLocation;
+            reasoning = `Afternoon collaboration session in the ${location.toLowerCase()} where ${persona.details.english_name} ${role.includes("Manager") || role.includes("Director") ? 'facilitates important meetings' : 'coordinates with team members'}.`;
+          } else {
+            // 일반적인 오후 업무
+            location = primaryWorkspace;
+            reasoning = `${persona.details.english_name} continues productive work in the ${location.toLowerCase()}, ${isAnalytical ? 'reviewing and refining deliverables' : 'making steady progress on ongoing projects'}.`;
+          }
           break;
           
         case 4: // 17:00-18:00 - 하루 마무리
-          location = primaryFacility;
-          reasoning = `Final session in ${location.toLowerCase()} to wrap up daily tasks and prepare for tomorrow with ${personality.split(',')[0].toLowerCase()} attention to detail.`;
+          if (personality.includes("Active") || personality.includes("Gym") || Math.random() > 0.7) {
+            // 활동적인 사람은 운동/휴식
+            location = breakLocation;
+            reasoning = `${persona.details.english_name} winds down with ${breakLocation.includes("Gym") ? 'an evening workout' : 'some leisure time'} at the ${location.toLowerCase()} before heading home.`;
+          } else if (role.includes("Manager") || role.includes("Director") || role.includes("Senior")) {
+            // 시니어급은 업무 정리
+            location = primaryWorkspace;
+            reasoning = `End-of-day wrap-up in the ${location.toLowerCase()} where ${persona.details.english_name} ${isAnalytical ? 'reviews the day and plans tomorrow' : 'ties up loose ends and prepares for the next day'}.`;
+          } else {
+            // 일반적으로 주 업무 공간에서 마무리
+            location = Math.random() > 0.5 ? primaryWorkspace : breakLocation;
+            if (location === primaryWorkspace) {
+              reasoning = `${persona.details.english_name} completes final tasks in the ${location.toLowerCase()} before ending the workday.`;
+            } else {
+              reasoning = `Brief relaxation time at the ${location.toLowerCase()} helps ${persona.details.english_name} decompress after a productive day.`;
+            }
+          }
+          break;
+          
+        default:
+          location = primaryWorkspace;
+          reasoning = `${persona.details.english_name} continues their activities in ${location.toLowerCase()}.`;
           break;
       }
       
@@ -464,11 +582,6 @@ export default function PersonaGenerationPage() {
         
         // 활동 시간대
         const activeHours = ["Morning", "Afternoon", "Evening"][Math.floor(Math.random() * 3)];
-        
-        // 시설 선호도 (2-3개)
-        const facilitiesCount = Math.floor(Math.random() * 2) + 2;
-        const shuffledFacilities = [...facilitiesToUse].sort(() => 0.5 - Math.random());
-        const preferredFacilities = shuffledFacilities.slice(0, facilitiesCount);
         
         // 프로필 설명 생성
         const descriptions = [
